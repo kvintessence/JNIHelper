@@ -22,91 +22,88 @@ namespace jh
     * Classes that describe internal implementation for Java instance calls.
     * Each class represents different return type of Java method.
     */
-    namespace // internal calls to instance methods
+    template<class ReturnType, class ... ArgumentTypes>
+    struct InstanceCaller
     {
-        template<class ReturnType, class ... ArgumentTypes>
-        struct InstanceCaller
+        static void call(JNIEnv* env, jobject instance, jmethodID javaMethod, ArgumentTypes ... arguments)
         {
-            static void call(JNIEnv* env, jobject instance, jmethodID javaMethod, ArgumentTypes ... arguments)
-            {
-                // this should fail to compile anyway because this method doesn't return anything
-                reportInternalError("can't find exact java caller");
-            }
-        };
+            // this should fail to compile anyway because this method doesn't return anything
+            reportInternalError("can't find exact java caller");
+        }
+    };
 
-        template<class ... ArgumentTypes>
-        struct InstanceCaller<void, ArgumentTypes...>
+    template<class ... ArgumentTypes>
+    struct InstanceCaller<void, ArgumentTypes...>
+    {
+        static typename NonVoidReturnType<void>::Type call(JNIEnv* env, jobject instance, jmethodID javaMethod, ArgumentTypes ... arguments)
         {
-            static typename NonVoidReturnType<void>::Type call(JNIEnv* env, jobject instance, jmethodID javaMethod, ArgumentTypes ... arguments)
-            {
-                env->CallVoidMethod(instance, javaMethod, arguments...);
-                return typename NonVoidReturnType<void>::Type();
-            }
-        };
+            env->CallVoidMethod(instance, javaMethod, arguments...);
+            return typename NonVoidReturnType<void>::Type();
+        }
+    };
 
-        template<class ... ArgumentTypes>
-        struct InstanceCaller<bool, ArgumentTypes...>
+    template<class ... ArgumentTypes>
+    struct InstanceCaller<bool, ArgumentTypes...>
+    {
+        static bool call(JNIEnv* env, jobject instance, jmethodID javaMethod, ArgumentTypes ... arguments)
         {
-            static bool call(JNIEnv* env, jobject instance, jmethodID javaMethod, ArgumentTypes ... arguments)
-            {
-                return env->CallBooleanMethod(instance, javaMethod, arguments...);
-            }
-        };
+            return env->CallBooleanMethod(instance, javaMethod, arguments...);
+        }
+    };
 
-        template<class ... ArgumentTypes>
-        struct InstanceCaller<int, ArgumentTypes...>
+    template<class ... ArgumentTypes>
+    struct InstanceCaller<int, ArgumentTypes...>
+    {
+        static int call(JNIEnv* env, jobject instance, jmethodID javaMethod, ArgumentTypes ... arguments)
         {
-            static int call(JNIEnv* env, jobject instance, jmethodID javaMethod, ArgumentTypes ... arguments)
-            {
-                return env->CallIntMethod(instance, javaMethod, arguments...);
-            }
-        };
+            return env->CallIntMethod(instance, javaMethod, arguments...);
+        }
+    };
 
-        template<class ... ArgumentTypes>
-        struct InstanceCaller<long, ArgumentTypes...>
+    template<class ... ArgumentTypes>
+    struct InstanceCaller<long, ArgumentTypes...>
+    {
+        static long call(JNIEnv* env, jobject instance, jmethodID javaMethod, ArgumentTypes ... arguments)
         {
-            static long call(JNIEnv* env, jobject instance, jmethodID javaMethod, ArgumentTypes ... arguments)
-            {
-                return env->CallLongMethod(instance, javaMethod, arguments...);
-            }
-        };
+            return env->CallLongMethod(instance, javaMethod, arguments...);
+        }
+    };
 
-        template<class ... ArgumentTypes>
-        struct InstanceCaller<float, ArgumentTypes...>
+    template<class ... ArgumentTypes>
+    struct InstanceCaller<float, ArgumentTypes...>
+    {
+        static float call(JNIEnv* env, jobject instance, jmethodID javaMethod, ArgumentTypes ... arguments)
         {
-            static float call(JNIEnv* env, jobject instance, jmethodID javaMethod, ArgumentTypes ... arguments)
-            {
-                return env->CallFloatMethod(instance, javaMethod, arguments...);
-            }
-        };
+            return env->CallFloatMethod(instance, javaMethod, arguments...);
+        }
+    };
 
-        template<class ... ArgumentTypes>
-        struct InstanceCaller<double, ArgumentTypes...>
+    template<class ... ArgumentTypes>
+    struct InstanceCaller<double, ArgumentTypes...>
+    {
+        static double call(JNIEnv* env, jobject instance, jmethodID javaMethod, ArgumentTypes ... arguments)
         {
-            static double call(JNIEnv* env, jobject instance, jmethodID javaMethod, ArgumentTypes ... arguments)
-            {
-                return env->CallDoubleMethod(instance, javaMethod, arguments...);
-            }
-        };
+            return env->CallDoubleMethod(instance, javaMethod, arguments...);
+        }
+    };
 
-        template<class ... ArgumentTypes>
-        struct InstanceCaller<jobject, ArgumentTypes...>
+    template<class ... ArgumentTypes>
+    struct InstanceCaller<jobject, ArgumentTypes...>
+    {
+        static jobject call(JNIEnv* env, jobject instance, jmethodID javaMethod, ArgumentTypes ... arguments)
         {
-            static jobject call(JNIEnv* env, jobject instance, jmethodID javaMethod, ArgumentTypes ... arguments)
-            {
-                return env->CallObjectMethod(instance, javaMethod, arguments...);
-            }
-        };
+            return env->CallObjectMethod(instance, javaMethod, arguments...);
+        }
+    };
 
-        template<class ... ArgumentTypes>
-        struct InstanceCaller<jstring, ArgumentTypes...>
+    template<class ... ArgumentTypes>
+    struct InstanceCaller<jstring, ArgumentTypes...>
+    {
+        static jstring call(JNIEnv* env, jobject instance, jmethodID javaMethod, ArgumentTypes ... arguments)
         {
-            static jstring call(JNIEnv* env, jobject instance, jmethodID javaMethod, ArgumentTypes ... arguments)
-            {
-                return static_cast<jstring>(env->CallObjectMethod(instance, javaMethod, arguments...));
-            }
-        };
-    }
+            return static_cast<jstring>(env->CallObjectMethod(instance, javaMethod, arguments...));
+        }
+    };
 
     /**
     * Calls a method on some Java object instance. Programmer should explicitly

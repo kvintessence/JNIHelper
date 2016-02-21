@@ -17,143 +17,140 @@ namespace jh
     * Internal Java method signature deduction. Each struct represents different
     * argument type of Java method.
     */
-    namespace // internal method signature deduction
+    template<class FirstArgumentType, class ... OtherArgumentTypes>
+    struct Signature
     {
-        template<class FirstArgumentType, class ... OtherArgumentTypes>
-        struct Signature
+        static std::string string()
         {
-            static std::string string()
-            {
-                return Signature<FirstArgumentType>::string() + Signature<OtherArgumentTypes...>::string();
-            }
-        };
+            return Signature<FirstArgumentType>::string() + Signature<OtherArgumentTypes...>::string();
+        }
+    };
 
-        template<>
-        struct Signature<void>
+    template<>
+    struct Signature<void>
+    {
+        static std::string string()
         {
-            static std::string string()
-            {
-                return "V";
-            }
-        };
+            return "V";
+        }
+    };
 
-        template<>
-        struct Signature<bool>
+    template<>
+    struct Signature<bool>
+    {
+        static std::string string()
         {
-            static std::string string()
-            {
-                return "Z";
-            }
-        };
+            return "Z";
+        }
+    };
 
-        template<>
-        struct Signature<int>
+    template<>
+    struct Signature<int>
+    {
+        static std::string string()
         {
-            static std::string string()
-            {
-                return "I";
-            }
-        };
+            return "I";
+        }
+    };
 
-        template<>
-        struct Signature<long>
+    template<>
+    struct Signature<long>
+    {
+        static std::string string()
         {
-            static std::string string()
-            {
-                return "J";
-            }
-        };
+            return "J";
+        }
+    };
 
-        template<>
-        struct Signature<float>
+    template<>
+    struct Signature<float>
+    {
+        static std::string string()
         {
-            static std::string string()
-            {
-                return "F";
-            }
-        };
+            return "F";
+        }
+    };
 
-        template<>
-        struct Signature<double>
+    template<>
+    struct Signature<double>
+    {
+        static std::string string()
         {
-            static std::string string()
-            {
-                return "D";
-            }
-        };
+            return "D";
+        }
+    };
 
-        template<>
-        struct Signature<jobject>
+    template<>
+    struct Signature<jobject>
+    {
+        static std::string string()
         {
-            static std::string string()
-            {
-                return "Ljava/lang/Object;";
-            }
-        };
+            return "Ljava/lang/Object;";
+        }
+    };
 
-        template<>
-        struct Signature<jstring>
+    template<>
+    struct Signature<jstring>
+    {
+        static std::string string()
         {
-            static std::string string()
-            {
-                return "Ljava/lang/String;";
-            }
-        };
+            return "Ljava/lang/String;";
+        }
+    };
 
-        template<>
-        struct Signature<jobjectArray>
+    template<>
+    struct Signature<jobjectArray>
+    {
+        static std::string string()
         {
-            static std::string string()
-            {
-                return std::string("[") + Signature<jobject>::string();
-            }
-        };
+            return std::string("[") + Signature<jobject>::string();
+        }
+    };
 
-        template<>
-        struct Signature<jbooleanArray>
+    template<>
+    struct Signature<jbooleanArray>
+    {
+        static std::string string()
         {
-            static std::string string()
-            {
-                return std::string("[") + Signature<bool>::string();
-            }
-        };
+            return std::string("[") + Signature<bool>::string();
+        }
+    };
 
-        template<>
-        struct Signature<jintArray>
+    template<>
+    struct Signature<jintArray>
+    {
+        static std::string string()
         {
-            static std::string string()
-            {
-                return std::string("[") + Signature<int>::string();
-            }
-        };
+            return std::string("[") + Signature<int>::string();
+        }
+    };
 
-        template<>
-        struct Signature<jlongArray>
+    template<>
+    struct Signature<jlongArray>
+    {
+        static std::string string()
         {
-            static std::string string()
-            {
-                return std::string("[") + Signature<long>::string();
-            }
-        };
+            return std::string("[") + Signature<long>::string();
+        }
+    };
 
-        template<>
-        struct Signature<jfloatArray>
+    template<>
+    struct Signature<jfloatArray>
+    {
+        static std::string string()
         {
-            static std::string string()
-            {
-                return std::string("[") + Signature<float>::string();
-            }
-        };
+            return std::string("[") + Signature<float>::string();
+        }
+    };
 
-        template<>
-        struct Signature<jdoubleArray>
+    template<>
+    struct Signature<jdoubleArray>
+    {
+        static std::string string()
         {
-            static std::string string()
-            {
-                return std::string("[") + Signature<double>::string();
-            }
-        };
-    }
+            return std::string("[") + Signature<double>::string();
+        }
+    };
 
     /**
     * Method that returns full java method signature based on the return type

@@ -10,7 +10,7 @@
 #define JH_ERROR_HANDLER_HPP
 
 #include <string>
-#include "zframework/debug.h"
+#include <android/log.h>
 
 namespace jh
 {
@@ -22,8 +22,18 @@ namespace jh
     */
     inline void reportInternalError(std::string errorMessage)
     {
-        _LOGE("ZFJavaHelper", "JavaHelper internal error: '%s'.", errorMessage.c_str());
-        // TODO : check java exceptions through JNI
+        __android_log_write(ANDROID_LOG_ERROR, "ZFJavaHelper", ("JavaHelper internal error: '" + errorMessage + "'.").c_str());
+    }
+
+    /**
+    * Reports some information to user.
+    * This method is intended to be used only by this library.
+    *
+    * @param errorMessage Message string describing the error.
+    */
+    inline void reportInternalInfo(std::string message)
+    {
+        __android_log_write(ANDROID_LOG_INFO, "ZFJavaHelper", ("JavaHelper message: '" + message + "'.").c_str());
     }
 }
 
