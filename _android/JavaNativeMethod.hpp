@@ -11,7 +11,6 @@
 
 #include <jni.h>
 #include "ErrorHandler.hpp"
-#include "JavaMethodSignature.hpp"
 
 namespace jh
 {

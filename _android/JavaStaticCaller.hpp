@@ -11,10 +11,9 @@
 
 #include <jni.h>
 #include <string>
-#include "NonVoidType.hpp"
+#include "ToJavaType.hpp"
 #include "ErrorHandler.hpp"
 #include "JavaEnvironment.hpp"
-#include "JavaCustomClass.hpp"
 #include "JavaMethodSignature.hpp"
 
 namespace jh
@@ -24,65 +23,57 @@ namespace jh
     * Each class represents different return type of Java method.
     */
     template<class ReturnType, class ... ArgumentTypes>
-    struct StaticCaller
-    {
-        static void call(JNIEnv* env, jclass javaClass, jmethodID javaMethod, ArgumentTypes ... arguments)
-        {
-            // this should fail to compile anyway because this method doesn't return anything
-            reportInternalError("can't find exact static java caller");
-        }
-    };
+    struct StaticCaller;
 
     template<class ... ArgumentTypes>
     struct StaticCaller<void, ArgumentTypes...>
     {
-        static typename NonVoidReturnType<void>::Type call(JNIEnv* env, jclass javaClass, jmethodID javaMethod, ArgumentTypes ... arguments)
+        static void call(JNIEnv* env, jclass javaClass, jmethodID javaMethod, ArgumentTypes ... arguments)
         {
             env->CallStaticVoidMethod(javaClass, javaMethod, arguments...);
-            return typename NonVoidReturnType<void>::Type();
         }
     };
 
     template<class ... ArgumentTypes>
-    struct StaticCaller<bool, ArgumentTypes...>
+    struct StaticCaller<jboolean, ArgumentTypes...>
     {
-        static bool call(JNIEnv* env, jclass javaClass, jmethodID javaMethod, ArgumentTypes ... arguments)
+        static jboolean call(JNIEnv* env, jclass javaClass, jmethodID javaMethod, ArgumentTypes ... arguments)
         {
             return env->CallStaticBooleanMethod(javaClass, javaMethod, arguments...);
         }
     };
 
     template<class ... ArgumentTypes>
-    struct StaticCaller<int, ArgumentTypes...>
+    struct StaticCaller<jint, ArgumentTypes...>
     {
-        static int call(JNIEnv* env, jclass javaClass, jmethodID javaMethod, ArgumentTypes ... arguments)
+        static jint call(JNIEnv* env, jclass javaClass, jmethodID javaMethod, ArgumentTypes ... arguments)
         {
             return env->CallStaticIntMethod(javaClass, javaMethod, arguments...);
         }
     };
 
     template<class ... ArgumentTypes>
-    struct StaticCaller<long, ArgumentTypes...>
+    struct StaticCaller<jlong, ArgumentTypes...>
     {
-        static long call(JNIEnv* env, jclass javaClass, jmethodID javaMethod, ArgumentTypes ... arguments)
+        static jlong call(JNIEnv* env, jclass javaClass, jmethodID javaMethod, ArgumentTypes ... arguments)
         {
             return env->CallStaticLongMethod(javaClass, javaMethod, arguments...);
         }
     };
 
     template<class ... ArgumentTypes>
-    struct StaticCaller<float, ArgumentTypes...>
+    struct StaticCaller<jfloat, ArgumentTypes...>
     {
-        static float call(JNIEnv* env, jclass javaClass, jmethodID javaMethod, ArgumentTypes ... arguments)
+        static jfloat call(JNIEnv* env, jclass javaClass, jmethodID javaMethod, ArgumentTypes ... arguments)
         {
             return env->CallStaticFloatMethod(javaClass, javaMethod, arguments...);
         }
     };
 
     template<class ... ArgumentTypes>
-    struct StaticCaller<double, ArgumentTypes...>
+    struct StaticCaller<jdouble, ArgumentTypes...>
     {
-        static double call(JNIEnv* env, jclass javaClass, jmethodID javaMethod, ArgumentTypes ... arguments)
+        static jdouble call(JNIEnv* env, jclass javaClass, jmethodID javaMethod, ArgumentTypes ... arguments)
         {
             return env->CallStaticDoubleMethod(javaClass, javaMethod, arguments...);
         }
@@ -133,9 +124,9 @@ namespace jh
     * @endcode
     */
     template<class RealReturnType, class ... ArgumentTypes>
-    typename NonVoidReturnType<RealReturnType>::Type callStaticMethod(std::string className, std::string methodName, typename NonVoidReturnType<ArgumentTypes>::Type ... arguments)
+    typename ToJavaType<RealReturnType>::Type callStaticMethod(std::string className, std::string methodName, typename ToJavaType<ArgumentTypes>::Type ... arguments)
     {
-        using FakeReturnType = typename NonVoidReturnType<RealReturnType>::Type;
+        using FakeReturnType = typename ToJavaType<RealReturnType>::Type;
 
         JNIEnv* env = getCurrentJNIEnvironment();
 
@@ -153,11 +144,13 @@ namespace jh
             return FakeReturnType();
         }
 
-        FakeReturnType result = StaticCaller<RealReturnType, typename NonVoidReturnType<ArgumentTypes>::Type ...>::call(env, javaClass, javaMethod, arguments...);
+        return StaticCaller<FakeReturnType, typename ToJavaType<ArgumentTypes>::Type ...>::call(env, javaClass, javaMethod, arguments...);
+    }
 
-        env->DeleteLocalRef(javaClass);
-
-        return result;
+    template<class JavaClassType, class RealReturnType, class ... ArgumentTypes>
+    typename ToJavaType<RealReturnType>::Type callStaticMethod(std::string methodName, typename ToJavaType<ArgumentTypes>::Type ... arguments)
+    {
+        return callStaticMethod<RealReturnType, ArgumentTypes ...>(JavaClassType::className(), methodName, arguments...);
     }
 }
 

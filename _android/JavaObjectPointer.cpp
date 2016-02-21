@@ -93,6 +93,6 @@ namespace jh
 
     JavaObjectPointer::operator bool() const
     {
-        return get();
+        return areEqual(get(), nullptr);
     }
 }

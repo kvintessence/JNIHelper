@@ -10,8 +10,6 @@
 #define JH_JAVA_OBJECT_POINTER_HPP
 
 #include <jni.h>
-#include <string>
-#include "NonVoidType.hpp"
 #include "JavaEnvironment.hpp"
 
 namespace jh

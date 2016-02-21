@@ -11,9 +11,9 @@
 
 #include <jni.h>
 #include <string>
+#include "ToJavaType.hpp"
 #include "ErrorHandler.hpp"
 #include "JavaEnvironment.hpp"
-#include "JavaCustomClass.hpp"
 #include "JavaMethodSignature.hpp"
 
 namespace jh
@@ -42,7 +42,7 @@ namespace jh
     * @endcode
     */
     template<class ... ArgumentTypes>
-    jobject createNewObject(std::string className, typename NonVoidReturnType<ArgumentTypes>::Type ... arguments)
+    jobject createNewObject(std::string className, typename ToJavaType<ArgumentTypes>::Type ... arguments)
     {
         JNIEnv* env = getCurrentJNIEnvironment();
 
@@ -65,6 +65,12 @@ namespace jh
         env->DeleteLocalRef(javaClass);
 
         return result;
+    }
+
+    template<class NewObjectType, class ... ArgumentTypes>
+    jobject createNewObject(typename ToJavaType<ArgumentTypes>::Type ... arguments)
+    {
+        return createNewObject<ArgumentTypes...>(NewObjectType::className(), arguments...);
     }
 }
 

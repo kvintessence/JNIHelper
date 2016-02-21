@@ -10,6 +10,7 @@
 #define JH_JAVA_METHOD_SIGNATURE_HPP
 
 #include <string>
+#include "ToJavaType.hpp"
 
 namespace jh
 {
@@ -22,133 +23,16 @@ namespace jh
     {
         static std::string string()
         {
-            return Signature<FirstArgumentType>::string() + Signature<OtherArgumentTypes...>::string();
+            return ToJavaType<FirstArgumentType>::signature() + Signature<OtherArgumentTypes...>::string();
         }
     };
 
-    template<>
-    struct Signature<void>
+    template<class ArgumentType>
+    struct Signature<ArgumentType>
     {
         static std::string string()
         {
-            return "V";
-        }
-    };
-
-    template<>
-    struct Signature<bool>
-    {
-        static std::string string()
-        {
-            return "Z";
-        }
-    };
-
-    template<>
-    struct Signature<int>
-    {
-        static std::string string()
-        {
-            return "I";
-        }
-    };
-
-    template<>
-    struct Signature<long>
-    {
-        static std::string string()
-        {
-            return "J";
-        }
-    };
-
-    template<>
-    struct Signature<float>
-    {
-        static std::string string()
-        {
-            return "F";
-        }
-    };
-
-    template<>
-    struct Signature<double>
-    {
-        static std::string string()
-        {
-            return "D";
-        }
-    };
-
-    template<>
-    struct Signature<jobject>
-    {
-        static std::string string()
-        {
-            return "Ljava/lang/Object;";
-        }
-    };
-
-    template<>
-    struct Signature<jstring>
-    {
-        static std::string string()
-        {
-            return "Ljava/lang/String;";
-        }
-    };
-
-    template<>
-    struct Signature<jobjectArray>
-    {
-        static std::string string()
-        {
-            return std::string("[") + Signature<jobject>::string();
-        }
-    };
-
-    template<>
-    struct Signature<jbooleanArray>
-    {
-        static std::string string()
-        {
-            return std::string("[") + Signature<bool>::string();
-        }
-    };
-
-    template<>
-    struct Signature<jintArray>
-    {
-        static std::string string()
-        {
-            return std::string("[") + Signature<int>::string();
-        }
-    };
-
-    template<>
-    struct Signature<jlongArray>
-    {
-        static std::string string()
-        {
-            return std::string("[") + Signature<long>::string();
-        }
-    };
-
-    template<>
-    struct Signature<jfloatArray>
-    {
-        static std::string string()
-        {
-            return std::string("[") + Signature<float>::string();
-        }
-    };
-
-    template<>
-    struct Signature<jdoubleArray>
-    {
-        static std::string string()
-        {
-            return std::string("[") + Signature<double>::string();
+            return ToJavaType<ArgumentType>::signature();
         }
     };
 

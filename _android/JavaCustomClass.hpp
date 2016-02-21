@@ -11,10 +11,6 @@
 
 #include <jni.h>
 #include <string>
-#include "NonVoidType.hpp"
-#include "JavaStaticCaller.hpp"
-#include "JavaInstanceCaller.hpp"
-#include "JavaMethodSignature.hpp"
 
 /**
 * This macro magic tells JavaHelper library about the existance of some android class.
@@ -53,46 +49,16 @@
 * @endcode
 */
 #define JH_JAVA_CUSTOM_CLASS(CLASS_NAME_TOKEN, CLASS_PATH_STRING)               \
-class CLASS_NAME_TOKEN##Class : public _jobject                                 \
+struct CLASS_NAME_TOKEN                                                         \
 {                                                                               \
-public:                                                                         \
-    static std::string name()                                                   \
+    static std::string className()                                              \
     {                                                                           \
         return CLASS_PATH_STRING;                                               \
     }                                                                           \
-};                                                                              \
-typedef CLASS_NAME_TOKEN##Class* CLASS_NAME_TOKEN;                              \
-namespace jh                                                                    \
-{                                                                               \
-    template<>                                                                  \
-    struct NonVoidReturnType<CLASS_NAME_TOKEN>                                  \
+    static std::string signature()                                              \
     {                                                                           \
-        using Type = jobject;                                                   \
-    };                                                                          \
-    template<>                                                                  \
-    struct Signature<CLASS_NAME_TOKEN>                                          \
-    {                                                                           \
-        static std::string string()                                             \
-        {                                                                       \
-            return "L" CLASS_PATH_STRING ";";                                   \
-        }                                                                       \
-    };                                                                          \
-    template<class ... ArgumentTypes>                                                                           \
-    struct StaticCaller<CLASS_NAME_TOKEN, ArgumentTypes...>                                                     \
-    {                                                                                                           \
-        static jobject call(JNIEnv* env, jclass javaClass, jmethodID javaMethod, ArgumentTypes ... arguments)   \
-        {                                                                                                       \
-            return env->CallStaticObjectMethod(javaClass, javaMethod, arguments...);                            \
-        }                                                                                                       \
-    };                                                                                                          \
-    template<class ... ArgumentTypes>                                                                           \
-    struct InstanceCaller<CLASS_NAME_TOKEN, ArgumentTypes...>                                                   \
-    {                                                                                                           \
-        static jobject call(JNIEnv* env, jobject instance, jmethodID javaMethod, ArgumentTypes ... arguments)   \
-        {                                                                                                       \
-            return env->CallObjectMethod(instance, javaMethod, arguments...);                                   \
-        }                                                                                                       \
-    };                                                                                                          \
-}                                                                                                               \
+        return "L" CLASS_PATH_STRING ";";                                       \
+    }                                                                           \
+};
 
 #endif

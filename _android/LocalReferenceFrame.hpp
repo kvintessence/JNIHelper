@@ -16,26 +16,52 @@ namespace jh
     class LocalReferenceFrame
     {
     public:
-        LocalReferenceFrame(int frameSize = 8)
-        : m_frameWasCreated(false)
+        LocalReferenceFrame(int frameSize = 16)
+        : m_frameSize(frameSize)
+        , m_framesCount(0)
         {
-            JNIEnv *env = getCurrentJNIEnvironment();
-
-            if (env->PushLocalFrame(frameSize) == 0) {
-                m_frameWasCreated = true;
-            }
+            push();
         }
 
         ~LocalReferenceFrame()
         {
-            if (m_frameWasCreated) {
-                JNIEnv *env = getCurrentJNIEnvironment();
-                env->PopLocalFrame(nullptr);
+            while (pop());
+        }
+
+        bool push()
+        {
+            JNIEnv *env = getCurrentJNIEnvironment();
+
+            if (env->PushLocalFrame(m_frameSize) == 0) {
+                ++m_framesCount;
+                return true;
             }
+
+            return false;
+        }
+
+        bool pop(jobject* jobjectToKeep = nullptr)
+        {
+            if (m_framesCount) {
+                JNIEnv *env = getCurrentJNIEnvironment();
+
+                if (jobjectToKeep) {
+                    *jobjectToKeep = env->PopLocalFrame(*jobjectToKeep);
+                } else {
+                    env->PopLocalFrame(nullptr);
+                }
+
+                --m_framesCount;
+
+                return true;
+            }
+
+            return false;
         }
 
     private:
-        bool m_frameWasCreated;
+        int m_frameSize;
+        int m_framesCount;
 
         LocalReferenceFrame(const LocalReferenceFrame &) = delete;
         void operator=(const LocalReferenceFrame &) = delete;
