@@ -9,7 +9,9 @@
 #ifndef JH_JAVA_OBJECT_WRAPPER_HPP
 #define JH_JAVA_OBJECT_WRAPPER_HPP
 
+#include <set>
 #include <vector>
+#include <functional>
 #include <jni.h>
 #include "ErrorHandler.hpp"
 #include "JavaNativeMethod.hpp"
@@ -89,11 +91,16 @@ namespace jh
     *
     * @endcode
     */
-    template <class InternalJavaClass, class WrapperClass>
+    template <class InternalJavaClass, class WrapperDerivedClass>
     class JavaObjectWrapper
     {
+    public:
+        using WrapperBase = JavaObjectWrapper<InternalJavaClass, WrapperDerivedClass>;
         using JavaClass = InternalJavaClass;
-        using WrapperObjectInfo = std::pair<jobject, WrapperClass*>;
+        using WrapperDerived = WrapperDerivedClass;
+
+    private:
+        using WrapperObjectInfo = std::pair<jobject, WrapperBase*>;
 
         /**
         * Native methods should have full access to the wrapper class.
@@ -110,7 +117,7 @@ namespace jh
         * Finds the wrapper object for jobject instance and calls the required method.
         */
         template<class MethodReturnType>
-        static MethodReturnType callCppObjectMethod(jobject javaObject, std::function<MethodReturnType(WrapperClass*)> callback)
+        static MethodReturnType callCppObjectMethod(jobject javaObject, std::function<MethodReturnType(WrapperBase*)> callback)
         {
             for (auto& entry: s_objectsCollection) {
                 if (jh::areEqual(entry.first, javaObject)) {
@@ -126,7 +133,7 @@ namespace jh
         /**
         * Registers the pair of wrapper object and the jobject.
         */
-        void registerObject(jobject javaObject, WrapperClass* cppObject)
+        void registerObject(jobject javaObject, WrapperBase* cppObject)
         {
             s_objectsCollection.insert(WrapperObjectInfo(javaObject, cppObject));
         }
@@ -134,7 +141,7 @@ namespace jh
         /**
         * Unregisters the pair of wrapper object and the jobject.
         */
-        void unregisterObject(jobject javaObject, WrapperClass* cppObject)
+        void unregisterObject(jobject javaObject, WrapperBase* cppObject)
         {
             auto entry = s_objectsCollection.find(WrapperObjectInfo(javaObject, cppObject));
 
@@ -146,16 +153,15 @@ namespace jh
         }
 
     public:
-        JavaObjectWrapper(WrapperClass* thisPointer)
+        JavaObjectWrapper()
         : m_javaObject(nullptr)
-        , m_thisPointer(thisPointer)
         {
             // nothing to do here
         }
 
         virtual ~JavaObjectWrapper()
         {
-            unregisterObject(m_javaObject, m_thisPointer);
+            unregisterObject(m_javaObject, this);
         }
 
         /**
@@ -195,7 +201,7 @@ namespace jh
                 m_javaObject = initializeJavaObject();
 
                 if (m_javaObject) {
-                    registerObject(m_javaObject, m_thisPointer);
+                    registerObject(m_javaObject, this);
                 }
             }
 
@@ -204,7 +210,6 @@ namespace jh
 
     private:
         JavaObjectPointer m_javaObject;
-        WrapperClass* m_thisPointer;
 
         /**
         * Holds the information about native methods registration.
@@ -226,9 +231,9 @@ namespace jh
         * @warning Native methods that were registered this way should NOT be called inside the java object constructor.
         */
         template<int id, class ReturnType, class ... Arguments>
-        void registerNativeMethod(std::string methodName, ReturnType (WrapperClass::*methodPointer)(Arguments...))
+        void registerNativeMethod(std::string methodName, ReturnType (WrapperBase::WrapperDerived::*methodPointer)(Arguments...))
         {
-            using NativeMethodClass = JavaNativeMethod<id, WrapperClass, ReturnType, Arguments...>;
+            using NativeMethodClass = JavaNativeMethod<id, WrapperBase, ReturnType, Arguments...>;
 
             s_nativeMethodsDescriptions.push_back({
                 methodName,

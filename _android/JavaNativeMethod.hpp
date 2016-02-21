@@ -26,23 +26,7 @@ namespace jh
     *
     * @warning Java native methods should be registered only after JNI initialization, i.e. dont use this method while doing some static-level stuff.
     */
-    bool registerJavaNativeMethods(std::string javaClassName, int methodCount, JNINativeMethod* methodDescriptions)
-    {
-        auto env = getCurrentJNIEnvironment();
-
-        jclass javaClass = env->FindClass(javaClassName.c_str());
-        if (javaClass == nullptr) {
-            reportInternalError("unable to find class [" + javaClassName + "] for native methods registration");
-            return false;
-        }
-
-        if (env->RegisterNatives(javaClass, methodDescriptions, methodCount) < 0) {
-            reportInternalError("unable to register native methods for class [" + javaClassName + "]");
-            return false;
-        }
-
-        return true;
-    }
+    bool registerJavaNativeMethods(std::string javaClassName, int methodCount, JNINativeMethod* methodDescriptions);
 
     /**
     * This class provides an static method that should be registered as java native method.
@@ -57,10 +41,10 @@ namespace jh
     * @warning Each combination of template parameters should correspond to ONLY ONE native method.
     * @warning Native methods that were implemented by this class should NOT be called inside the java object constructor.
     */
-    template<int id, class WrapperClass, class ReturnType, class ... Arguments>
+    template<int id, class WrapperBase, class ReturnType, class ... Arguments>
     class JavaNativeMethod
     {
-        using MethodImplementationPointer = ReturnType(WrapperClass::*)(Arguments...);
+        using MethodImplementationPointer = ReturnType(WrapperBase::WrapperDerived::*)(Arguments...);
 
         template <class, class>
         friend class JavaObjectWrapper;
@@ -71,7 +55,7 @@ namespace jh
         static void setCallback(MethodImplementationPointer callback)
         {
             if (s_callback) {
-                reportInternalError("redefining callback for java class [" + WrapperClass::JavaClass::name() + "]");
+                reportInternalError("redefining callback for java class [" + WrapperBase::JavaClass::name() + "]");
             }
 
             s_callback = callback;
@@ -79,8 +63,9 @@ namespace jh
 
         static ReturnType rawNativeMethod(JNIEnv*, jobject javaObject, Arguments ... args)
         {
-            return WrapperClass::template callCppObjectMethod<ReturnType>(javaObject, [=] (WrapperClass* wrapperInstance) -> ReturnType {
-                return (wrapperInstance->*s_callback)(args...);
+            return WrapperBase::WrapperDerived::template callCppObjectMethod<ReturnType>(javaObject, [=] (WrapperBase* wrapperInstance) -> ReturnType {
+                typename WrapperBase::WrapperDerived* ptr = static_cast<typename WrapperBase::WrapperDerived*>(wrapperInstance);
+                return (ptr->*s_callback)(args...);
             });
         }
     };

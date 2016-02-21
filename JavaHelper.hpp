@@ -94,6 +94,8 @@
 #include "_android/JavaObjectCreation.hpp"
 #include "_android/JavaCustomClass.hpp"
 
+#include "_android/JStringUtils.hpp"
+
 #include "_android/JavaObjectWrapper.hpp"
 
 #endif

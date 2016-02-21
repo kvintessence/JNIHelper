@@ -98,6 +98,15 @@ namespace jh
                 return env->CallStaticObjectMethod(javaClass, javaMethod, arguments...);
             }
         };
+
+        template<class ... ArgumentTypes>
+        struct StaticCaller<jstring, ArgumentTypes...>
+        {
+            static jstring call(JNIEnv* env, jclass javaClass, jmethodID javaMethod, ArgumentTypes ... arguments)
+            {
+                return static_cast<jstring>(env->CallStaticObjectMethod(javaClass, javaMethod, arguments...));
+            }
+        };
     }
 
     /**
@@ -127,7 +136,7 @@ namespace jh
     * @endcode
     */
     template<class RealReturnType, class ... ArgumentTypes>
-    typename NonVoidReturnType<RealReturnType>::Type callStaticMethod(std::string className, std::string methodName, ArgumentTypes ... arguments)
+    typename NonVoidReturnType<RealReturnType>::Type callStaticMethod(std::string className, std::string methodName, typename NonVoidReturnType<ArgumentTypes>::Type ... arguments)
     {
         using FakeReturnType = typename NonVoidReturnType<RealReturnType>::Type;
 
@@ -143,11 +152,11 @@ namespace jh
 
         jmethodID javaMethod = env->GetStaticMethodID(javaClass, methodName.c_str(), methodSignature.c_str());
         if (javaMethod == nullptr) {
-            reportInternalError("method [" + methodName + "] for class [" + className + "] not found");
+            reportInternalError("method [" + methodName + "] for class [" + className + "] not found, tried signature [" + methodSignature + "]");
             return FakeReturnType();
         }
 
-        FakeReturnType result = StaticCaller<RealReturnType, ArgumentTypes...>::call(env, javaClass, javaMethod, arguments...);
+        FakeReturnType result = StaticCaller<RealReturnType, typename NonVoidReturnType<ArgumentTypes>::Type ...>::call(env, javaClass, javaMethod, arguments...);
 
         env->DeleteLocalRef(javaClass);
 

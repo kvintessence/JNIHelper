@@ -42,7 +42,7 @@ namespace jh
     * @endcode
     */
     template<class ... ArgumentTypes>
-    jobject createNewObject(std::string className, ArgumentTypes ... arguments)
+    jobject createNewObject(std::string className, typename NonVoidReturnType<ArgumentTypes>::Type ... arguments)
     {
         JNIEnv* env = getCurrentJNIEnvironment();
 
@@ -56,7 +56,7 @@ namespace jh
 
         jmethodID javaConstructor = env->GetMethodID(javaClass, "<init>", methodSignature.c_str());
         if (javaConstructor == nullptr) {
-            reportInternalError("constructor for class [" + className + "] not found");
+            reportInternalError("constructor for class [" + className + "] not found, tried signature [" + methodSignature + "]");
             return nullptr;
         }
 
