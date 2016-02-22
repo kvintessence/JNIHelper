@@ -1,13 +1,32 @@
-/*!
-   \file JavaObjectCreation.hpp
-   \brief A utility header to create new java objects from c++ code.
-   \author Denis Sorokin
-   \date January 24 2016
-   \copyright Zeptolab, 2016
- */
+/**
+    \file ObjectCreation.hpp
+    \brief Creation of new java objects from C++ code.
+    \author Denis Sorokin
+    \date 24.01.2016
+*/
 
-#ifndef JH_JAVA_OBJECT_CREATION_HPP
-#define JH_JAVA_OBJECT_CREATION_HPP
+/**
+* Cheat sheet:
+*
+* @code{.cpp}
+*
+* // Lets declare custom Java class:
+* JH_JAVA_CUSTOM_CLASS(Example, "com/class/path/Example");
+* JH_JAVA_CUSTOM_CLASS(Parameter, "com/class/path/Parameter");
+*
+* // Create an object via default constructor (old style / new style):
+* jobject first    = jh::createNewObject<>(Parameter::className());
+* jobject first_v2 = jh::createNewObject<Parameter>();
+*
+* // Create an object via constructor with two arguments (old style / new style):
+* jobject second    = jh::createNewObject<Parameter, int>(Example::className(), first, 100);
+* jobject second_v2 = jh::createNewObject<Example, Parameter, int>(first, 100);
+*
+* @endcode
+*/
+
+#ifndef JH_OBJECT_CREATION_HPP
+#define JH_OBJECT_CREATION_HPP
 
 #include <jni.h>
 #include <string>
@@ -25,21 +44,6 @@ namespace jh
     * @param className Java class name as a string.
     * @param arguments List of arguments for the constructor.
     * @return Create Java object pointer (aka jobject).
-    *
-    * Possible usage example:
-    *
-    * @code{.cpp}
-    *
-    * // Lets declare custom Java class
-    * JH_JAVA_CUSTOM_CLASS(Example, "com/class/path/Example");
-    *
-    * // Create an object via default constructor:
-    * jobject first = jh::createNewObject<>(ExampleClass::name());
-    *
-    * // Create an object via constructor with two arguments:
-    * jobject second = jh::createNewObject<Example, int>(ExampleClass::name(), first, 100);
-    *
-    * @endcode
     */
     template<class ... ArgumentTypes>
     jobject createNewObject(std::string className, typename ToJavaType<ArgumentTypes>::Type ... arguments)
@@ -67,6 +71,13 @@ namespace jh
         return result;
     }
 
+    /**
+    * New style of java object creation, where object class is specified
+    * in the template arguments.
+    *
+    * @param arguments List of arguments for the constructor.
+    * @return Create Java object pointer (aka jobject).
+    */
     template<class NewObjectType, class ... ArgumentTypes>
     jobject createNewObject(typename ToJavaType<ArgumentTypes>::Type ... arguments)
     {

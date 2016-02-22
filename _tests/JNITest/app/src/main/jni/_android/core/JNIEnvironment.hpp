@@ -1,10 +1,32 @@
-/*!
-   \file JNIEnvironment.hpp
-   \brief Utilities to get and use JNIEnv* pointer.
-   \author Denis Sorokin
-   \date January 24 2016
-   \copyright Zeptolab, 2016
- */
+/**
+    \file JNIEnvironment.hpp
+    \brief Utilities to get and use JNIEnv* pointer.
+    \author Denis Sorokin
+    \date 24.01.2016
+*/
+
+/**
+* Cheat sheet:
+*
+* @code{.cpp}
+*
+* // Lets assume that we have entered some scope and we are in a non-java thread:
+* {
+*
+* // Attaching this thread to JVM:
+* jh::JavaEnvironmentGuarantee javaContext();
+*
+* // Get JNIEnv* pointer and do something with it:
+* auto env = jh::getCurrentJNIEnvironment();
+*
+* // Doing something with Java code; for example, creating jstring...
+* ...
+*
+* // Leaving the scope; this thread will be detached from JVM:
+* }
+*
+* @endcode
+*/
 
 #ifndef JH_JAVA_ENVIRONMENT_HPP
 #define JH_JAVA_ENVIRONMENT_HPP
@@ -36,24 +58,6 @@ namespace jh
     * it is not attached already (and detaches if it is needed after destruction).
     *
     * @warning Right now, user can't use non-default Java objects in non-Java thread.
-    *
-    * Possible usage example:
-    *
-    * @code{.cpp}
-    *
-    * // lets assume that we have entered some scope and we are in a non-java thread
-    * {
-    *
-    * // attaching this thread to JVM
-    * JavaEnvironmentGuarantee javaContext();
-    *
-    * // Doing something with Java code; for example, creating jstring.
-    * ...
-    *
-    * // leaving the scope; this thread will be detached from JVM
-    * }
-    *
-    * @endcode
     */
     class JNIEnvironmentGuarantee
     {

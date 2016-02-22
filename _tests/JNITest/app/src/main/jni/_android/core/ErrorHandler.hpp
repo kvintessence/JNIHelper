@@ -1,10 +1,9 @@
-/*!
-   \file ErrorHandler.hpp
-   \brief Describes how internal errors should be reported.
-   \author Denis Sorokin
-   \date January 24 2016
-   \copyright Zeptolab, 2016
- */
+/**
+    \file ErrorHandler.hpp
+    \brief Describes how internal errors should be reported.
+    \author Denis Sorokin
+    \date 24.01.2016
+*/
 
 #ifndef JH_ERROR_HANDLER_HPP
 #define JH_ERROR_HANDLER_HPP
@@ -29,7 +28,7 @@ namespace jh
     * Reports some information to user.
     * This method is intended to be used only by this library.
     *
-    * @param errorMessage Message string describing the error.
+    * @param message Message string that should be reported to user.
     */
     inline void reportInternalInfo(std::string message)
     {

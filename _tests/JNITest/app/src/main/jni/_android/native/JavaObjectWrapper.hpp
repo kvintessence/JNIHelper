@@ -1,10 +1,71 @@
-/*!
-   \file JavaObjectWrapper.hpp
-   \brief
-   \author Denis Sorokin
-   \date February 15 2016
-   \copyright Zeptolab, 2016
- */
+/**
+    \file JavaObjectWrapper.hpp
+    \brief C++ wrapper of some java class.
+    \author Denis Sorokin
+    \date 15.01.2016
+*/
+
+/*
+* Cheat sheet:
+*
+* @code{.java}
+*
+* // Let's assume that we have some java class like this:
+* package com.some.path;
+*
+* public class Example
+* {
+*     ...
+*     protected native void someVoidMethod();
+*     protected native int sumTwo(int x, int y);
+*     ...
+* }
+*
+* @endcode
+*
+* @code{.cpp}
+*
+* // Let's declare some java class:
+* JH_JAVA_CUSTOM_CLASS(JavaExample, "com/some/path/Example");
+*
+* // Now declare our wrapper:
+* class ExampleWrapper : public jh::JavaObjectWrapper<JavaExample, ExampleWrapper>
+* {
+*     // We need to implement two abstract methods - 'linkJavaNativeMethods' and 'initializeJavaObject'.
+*
+*     // Inside 'linkJavaNativeMethods' method we should register all native methods of the wrapped class.
+*     // First argument should be unique method ID for this wrapper class:
+*     void linkJavaNativeMethods() override
+*     {
+*         registerNativeMethod<1, void>("someVoidMethod", &ExampleWrapper::interstitialPressed);
+*         registerNativeMethod<2, int, int, int>("sumTwo", &ExampleWrapper::interstitialClosed);
+*     }
+*
+*     // Inside 'initializeJavaObject' method we should created and return an instance of wrapped java class.
+*     // This method will never be called after it returns a non-nullptr value. This method also supports lazy
+*     // initialization; if it returns nullptr, then it will be called again after the next 'object()' method call.
+*     jobject initializeJavaObject() override
+*     {
+*         return jh::createNewObject<ExampleClass>();
+*     }
+*
+*     // Now we should implement those native methods:
+*     void someVoidMethod() { log("Example", "Look, I'm logging something!"); }
+*     int sumTwo(int x, int y) { return x + y; }
+*
+*     // In case we use some lazy initialization:
+*     void doSomething()
+*     {
+*         if (auto wrapper = object()) {
+*             // We can use wrapper object.
+*         } else {
+*             // Do something else.
+*         }
+*     }
+* }
+*
+* @endcode
+*/
 
 #ifndef JH_JAVA_OBJECT_WRAPPER_HPP
 #define JH_JAVA_OBJECT_WRAPPER_HPP
@@ -40,67 +101,21 @@ namespace jh
     *
     * @param InternalJavaClass The java class that should be wrapped. Should be declared by JH_JAVA_CUSTOM_CLASS macro.
     * @param WrapperClass The C++ class that wraps the java class. Should be equal to the class that derives from JavaObjectWrapper.
-    *
-    * Possible usage example:
-    *
-    * @code{.java}
-    *
-    * // Let's assume that we have some java class like this:
-    * package com.some.path;
-    *
-    * public class Example
-    * {
-    *     ...
-    *     protected native void someVoidMethod();
-    *     protected native int sumTwo(int x, int y);
-    *     ...
-    * }
-    *
-    * @endcode
-    *
-    * @code{.cpp}
-    *
-    * // Let's declare some java class:
-    * JH_JAVA_CUSTOM_CLASS(JavaExample, "com/some/path/Example");
-    *
-    * // Now declare our wrapper:
-    * class ExampleWrapper : public jh::JavaObjectWrapper<JavaExampleClass, ExampleWrapper>
-    * {
-    *     // Inside the constructor we should pass 'this' pointer to the base class:
-    *     ExampleWrapper(...) : jh::JavaObjectWrapper<JavaExampleClass, ExampleWrapper>(this) { ... }
-    *
-    *     // We also need to implement two abstract methods - 'linkJavaNativeMethods' and 'initializeJavaObject'.
-    *
-    *     // Inside 'linkJavaNativeMethods' method we should register all native methods of the wrapped class:
-    *     void linkJavaNativeMethods() override
-    *     {
-    *         registerNativeMethod<1, void>("someVoidMethod", &ExampleWrapper::interstitialPressed);
-    *         registerNativeMethod<2, int, int, int>("sumTwo", &ExampleWrapper::interstitialClosed);
-    *     }
-    *
-    *     // Inside 'initializeJavaObject' method we should created and return an instance of wrapped java class.
-    *     // This method will never be called after it returns a non-nullptr value. This method also supports lazy
-    *     // initialization; if it returns nullptr, then it will be called again after the next 'object()' method call.
-    *     jobject initializeJavaObject() override
-    *     {
-    *         return jh::createNewObject<>(ExampleClass::name());
-    *     }
-    *
-    *     // Now we should implement those native methods:
-    *     void someVoidMethod() { log("Example", "Look, I'm logging something!"); }
-    *     int sumTwo(int x, int y) { return x + y; }
-    * }
-    *
-    * @endcode
     */
     template <class InternalJavaClass, class WrapperClass>
     class JavaObjectWrapper
     {
     public:
+        /**
+        * Declaring types for later usage by internal code.
+        */
         using JavaClass = InternalJavaClass;
         using CppClass = WrapperClass;
 
     private:
+        /**
+        * Information about exsiting links between java objects and cpp wrappers.
+        */
         using WrapperObjectInfo = std::pair<jobject, CppClass*>;
 
         /**
@@ -110,7 +125,7 @@ namespace jh
         friend class JavaNativeMethod;
 
         /**
-        * Map of all wrapper objects and their jobjects.
+        * Pool of all wrapper objects and their jobjects.
         */
         static std::set<WrapperObjectInfo> s_objectsCollection;
 
@@ -154,19 +169,26 @@ namespace jh
         }
 
     public:
+        /**
+        * Default constructor for java wrapper object.
+        */
         JavaObjectWrapper()
         : m_javaObject(nullptr)
         {
             // nothing to do here
         }
 
+        /**
+        * Removes this wrapper calss from the global wrapper's pool.
+        */
         virtual ~JavaObjectWrapper()
         {
             unregisterObject(m_javaObject, static_cast<CppClass*>(this));
         }
 
         /**
-        * Returns the jobject of this wrapper class instance.
+        * Returns the jobject of this wrapper class instance. Will also link
+        * native methods and initialize the internal java object if it wasn't done before.
         */
         jobject object()
         {
@@ -205,6 +227,9 @@ namespace jh
         }
 
     private:
+        /**
+        * Pointer to the wrapped java object.
+        */
         JavaObjectPointer m_javaObject;
 
         /**
@@ -218,6 +243,9 @@ namespace jh
         static bool s_nativeMethodsWereRegistered;
         static std::vector<NativeMethodDescription> s_nativeMethodsDescriptions;
 
+        /**
+        * This method should specify all necessary native methods that will be used by the java class.
+        */
         virtual void linkJavaNativeMethods() = 0;
 
     protected:

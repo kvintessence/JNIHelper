@@ -1,25 +1,27 @@
-/*!
-   \file JavaArrayAllocator.hpp
-   \brief
-   \author Denis Sorokin
-   \date 22.02.2016
- */
+/**
+    \file ArrayAllocator.hpp
+    \brief Internal implementations to create different java arrays.
+    \author Denis Sorokin
+    \date 22.02.2016
+*/
 
-#ifndef JH_JAVA_ARRAY_ALLOCATOR_HPP
-#define JH_JAVA_ARRAY_ALLOCATOR_HPP
+#ifndef JH_ARRAY_ALLOCATOR_HPP
+#define JH_ARRAY_ALLOCATOR_HPP
 
 #include <jni.h>
 #include "../core/ErrorHandler.hpp"
-#include "../core/JNIEnvironment.hpp"
 
 namespace jh
 {
     /**
-    * Implementations for creating java arrays.
+    * Stub implementation of java array creation.
     */
     template<class JavaArrayType, class ElementType>
     struct JavaArrayAllocator;
 
+    /**
+    * Implementation of java boolean array creation.
+    */
     template<class ElementType>
     struct JavaArrayAllocator<jbooleanArray, ElementType>
     {
@@ -29,6 +31,9 @@ namespace jh
         }
     };
 
+    /**
+    * Implementation of java int array creation.
+    */
     template<class ElementType>
     struct JavaArrayAllocator<jintArray, ElementType>
     {
@@ -38,6 +43,9 @@ namespace jh
         }
     };
 
+    /**
+    * Implementation of java long array creation.
+    */
     template<class ElementType>
     struct JavaArrayAllocator<jlongArray, ElementType>
     {
@@ -47,6 +55,9 @@ namespace jh
         }
     };
 
+    /**
+    * Implementation of java float array creation.
+    */
     template<class ElementType>
     struct JavaArrayAllocator<jfloatArray, ElementType>
     {
@@ -56,6 +67,9 @@ namespace jh
         }
     };
 
+    /**
+    * Implementation of java double array creation.
+    */
     template<class ElementType>
     struct JavaArrayAllocator<jdoubleArray, ElementType>
     {
@@ -65,6 +79,11 @@ namespace jh
         }
     };
 
+    /**
+    * Implementation of java object array creation.
+    *
+    * @param ElementType Type of java object in the array.
+    */
     template<class ElementType>
     struct JavaArrayAllocator<jobjectArray, ElementType>
     {

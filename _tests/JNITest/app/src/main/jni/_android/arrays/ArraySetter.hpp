@@ -1,24 +1,26 @@
-/*!
-   \file JavaArraySetter.hpp
-   \brief
-   \author Denis Sorokin
-   \date 22.02.2016
- */
+/**
+    \file ArraySetter.hpp
+    \brief Internal implementation of setting elements inside java arrays.
+    \author Denis Sorokin
+    \date 22.02.2016
+*/
 
-#ifndef JH_JAVA_ARRAY_SETTER_HPP
-#define JH_JAVA_ARRAY_SETTER_HPP
+#ifndef JH_ARRAY_SETTER_HPP
+#define JH_ARRAY_SETTER_HPP
 
 #include <jni.h>
-#include "../core/JNIEnvironment.hpp"
 
 namespace jh
 {
     /**
-    * Implementations for setting values into java arrays.
+    * Stub implementations for setting elements of java arrays.
     */
     template<class JavaArrayType>
     struct JavaArraySetter;
 
+    /**
+    * Implementations for setting elements of java boolean arrays.
+    */
     template<>
     struct JavaArraySetter<jbooleanArray>
     {
@@ -28,6 +30,9 @@ namespace jh
         }
     };
 
+    /**
+    * Implementations for setting elements of java int arrays.
+    */
     template<>
     struct JavaArraySetter<jintArray>
     {
@@ -37,6 +42,9 @@ namespace jh
         }
     };
 
+    /**
+    * Implementations for setting elements of java long arrays.
+    */
     template<>
     struct JavaArraySetter<jlongArray>
     {
@@ -46,6 +54,9 @@ namespace jh
         }
     };
 
+    /**
+    * Implementations for setting elements of java float arrays.
+    */
     template<>
     struct JavaArraySetter<jfloatArray>
     {
@@ -55,6 +66,9 @@ namespace jh
         }
     };
 
+    /**
+    * Implementations for setting elements of java double arrays.
+    */
     template<>
     struct JavaArraySetter<jdoubleArray>
     {
@@ -64,6 +78,9 @@ namespace jh
         }
     };
 
+    /**
+    * Implementations for setting elements of java object arrays.
+    */
     template<>
     struct JavaArraySetter<jobjectArray>
     {

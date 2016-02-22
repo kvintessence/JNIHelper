@@ -1,13 +1,35 @@
-/*!
-   \file JavaStaticCaller.hpp
-   \brief A utility header to call static java methods.
-   \author Denis Sorokin
-   \date January 24 2016
-   \copyright Zeptolab, 2016
- */
+/**
+    \file StaticCaller.hpp
+    \brief Static java methods calls.
+    \author Denis Sorokin
+    \date 24.01.2016
+*/
 
-#ifndef JH_JAVA_STATIC_CALLER_HPP
-#define JH_JAVA_STATIC_CALLER_HPP
+/**
+* Cheat sheet:
+*
+* @code{.cpp}
+*
+* // Declaring some custom Java class:
+* JH_JAVA_CUSTOM_CLASS(Example, "com/class/path/Example");
+*
+* // Calling void static method without arguments (old style / new style):
+* jh::callStaticMethod<void>(Example::className(), "voidMethodName");
+* jh::callStaticMethod<Example, void>("voidMethodName");
+*
+* // Calling int static method with two arguments (old style / new style):
+* int sum = jh::callStaticMethod<int, int, int>(Example::className(), "sumMethod", 4, 5);
+* int sum = jh::callStaticMethod<Example, int, int, int>("sumMethod", 4, 5);
+*
+* // Calling static factory method that returns some custom Java object (old style / new style):
+* jobject newObject = jh::callStaticMethod<Example, double>(Example::className(), "factoryMethodName", 3.1415);
+* jobject newObject = jh::callStaticMethod<Example, Example, double>("factoryMethodName", 3.1415);
+*
+* @endcode
+*/
+
+#ifndef JH_STATIC_CALLER_HPP
+#define JH_STATIC_CALLER_HPP
 
 #include <jni.h>
 #include <string>
@@ -19,8 +41,7 @@
 namespace jh
 {
     /**
-    * Classes that describe internal implementation for Java static calls.
-    * Each class represents different return type of Java method.
+    * Class that can call static methods which return java objects.
     */
     template<class ReturnType, class ... ArgumentTypes>
     struct StaticCaller
@@ -31,6 +52,9 @@ namespace jh
         }
     };
 
+    /**
+    * Class that can call static methods which doesn't return anything.
+    */
     template<class ... ArgumentTypes>
     struct StaticCaller<void, ArgumentTypes...>
     {
@@ -40,6 +64,9 @@ namespace jh
         }
     };
 
+    /**
+    * Class that can call static methods which return jboolean values.
+    */
     template<class ... ArgumentTypes>
     struct StaticCaller<jboolean, ArgumentTypes...>
     {
@@ -49,6 +76,9 @@ namespace jh
         }
     };
 
+    /**
+    * Class that can call static methods which return jint values.
+    */
     template<class ... ArgumentTypes>
     struct StaticCaller<jint, ArgumentTypes...>
     {
@@ -58,6 +88,9 @@ namespace jh
         }
     };
 
+    /**
+    * Class that can call static methods which return jlong values.
+    */
     template<class ... ArgumentTypes>
     struct StaticCaller<jlong, ArgumentTypes...>
     {
@@ -67,6 +100,9 @@ namespace jh
         }
     };
 
+    /**
+    * Class that can call static methods which return jfloat values.
+    */
     template<class ... ArgumentTypes>
     struct StaticCaller<jfloat, ArgumentTypes...>
     {
@@ -76,6 +112,9 @@ namespace jh
         }
     };
 
+    /**
+    * Class that can call static methods which return jdouble values.
+    */
     template<class ... ArgumentTypes>
     struct StaticCaller<jdouble, ArgumentTypes...>
     {
@@ -92,24 +131,7 @@ namespace jh
     * @param className Java class name as string.
     * @param methodName Method name as string.
     * @param arguments List of arguments to the java method call.
-    *
-    * Possible usage example:
-    *
-    * @code{.cpp}
-    *
-    * // Declaring some custom Java class:
-    * JH_JAVA_CUSTOM_CLASS(Example, "com/class/path/Example");
-    *
-    * // Calling void static method without arguments:
-    * jh::callStaticMethod<void>(ExampleClass::name(), "voidMethodName");
-    *
-    * // Calling int static method with two arguments:
-    * int sum = jh::callStaticMethod<int, int, int>(ExampleClass::name(), "sumMethod", 4, 5);
-    *
-    * // Calling static factory method that returns some custom Java object:
-    * jobject newObject = jh::callStaticMethod<Example, double>(ExampleClass::name(), "factoryMethodName", 3.1415);
-    *
-    * @endcode
+    * @return Some value of ReturnType type returned by the specified static method.
     */
     template<class ReturnType, class ... ArgumentTypes>
     typename ToJavaType<ReturnType>::Type callStaticMethod(std::string className, std::string methodName, typename ToJavaType<ArgumentTypes>::Type ... arguments)
@@ -135,6 +157,14 @@ namespace jh
         return static_cast<RealReturnType>(StaticCaller<typename ToJavaType<ReturnType>::CallReturnType, typename ToJavaType<ArgumentTypes>::Type ...>::call(env, javaClass, javaMethod, arguments...));
     }
 
+    /**
+    * New style of calling static methods, where java class is specified
+    * via template argument.
+    *
+    * @param methodName Method name as string.
+    * @param arguments List of arguments to the java method call.
+    * @return Some value of ReturnType type returned by the specified static method.
+    */
     template<class JavaClassType, class ReturnType, class ... ArgumentTypes>
     typename ToJavaType<ReturnType>::Type callStaticMethod(std::string methodName, typename ToJavaType<ArgumentTypes>::Type ... arguments)
     {

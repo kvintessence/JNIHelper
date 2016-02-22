@@ -1,10 +1,41 @@
-/*!
-   \file JavaObjectPointer.hpp
-   \brief RAII class to store jobject reference as a global reference.
-   \author Denis Sorokin
-   \date January 28 2016
-   \copyright Zeptolab, 2016
- */
+/**
+    \file JavaObjectPointer.hpp
+    \brief RAII class to store jobject reference as a global reference.
+    \author Denis Sorokin
+    \date 28.01.2016
+*/
+
+/**
+* Cheat sheet:
+*
+* @code{.cpp}
+*
+* // Declare two Java object pointers:
+* jh::JavaObjectPointer obj;
+* jh::JavaObjectPointer obj2;
+*
+* // Declare some special Java class:
+* JH_JAVA_CUSTOM_CLASS(Example, "com/class/path/Example");
+*
+* // Can check if pointer holds any jobject:
+* if (!obj)
+*     log("pointer is empty!");
+*
+* // Can be assigned from jobject:
+* obj = jh::createNewObject<Example>();
+*
+* // Can be assigned from other JavaObjectPointer:
+* obj2 = obj;
+*
+* // Can be compared:
+* if (obj == obj2)
+*     log("they are the same object");
+*
+* // Can be used as an argument in Java calls:
+* jh::callStaticMethod<Example, void, Example>("someMethodName", obj);
+*
+* @endcode
+*/
 
 #ifndef JH_JAVA_OBJECT_POINTER_HPP
 #define JH_JAVA_OBJECT_POINTER_HPP
@@ -15,38 +46,8 @@
 namespace jh
 {
     /**
-    * Java object (aka jobject) RAII wrapper that holds jobject as global Java
+    * Java object (aka jobject) RAII wrapper that holds jobject as a global Java
     * reference. Can be assigned from jobject, casted to jobject and so on.
-    *
-    * Possible usage example:
-    *
-    * @code{.cpp}
-    *
-    * // Declare two Java object pointers:
-    * jh::JavaObjectPointer obj;
-    * jh::JavaObjectPointer obj2;
-    *
-    * // Declare some special Java class:
-    * JH_JAVA_CUSTOM_CLASS(Example, "com/class/path/Example");
-    *
-    * // Can check if pointer holds any jobject:
-    * if (!obj)
-    *     log("pointer is empty!");
-    *
-    * // Can be assigned from jobject:
-    * obj = jh::createNewObject<>(ExampleClass::name());
-    *
-    * // Can be assigned from other JavaObjectPointer:
-    * obj2 = obj;
-    *
-    * // Can be compared:
-    * if (obj == obj2)
-    *     log("they are the same object");
-    *
-    * // Can be used as an argument in Java calls:
-    * jh::callStaticMethod<void, Example>(ExampleClass::name(), "someMethodName", obj);
-    *
-    * @endcode
     */
     class JavaObjectPointer
     {
