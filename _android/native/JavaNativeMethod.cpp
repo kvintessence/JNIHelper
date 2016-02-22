@@ -6,8 +6,10 @@
    \copyright Zeptolab, 2016
  */
 
-#include "JavaNativeMethod.hpp"
-#include "JavaEnvironment.hpp"
+#include <string>
+#include "../core/ErrorHandler.hpp"
+#include "../core/JNIEnvironment.hpp"
+#include "../native/JavaNativeMethod.hpp"
 
 namespace jh
 {

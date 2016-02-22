@@ -6,8 +6,8 @@
    \copyright Zeptolab, 2016
  */
 
-#include "JStringUtils.hpp"
-#include "JavaEnvironment.hpp"
+#include "../core/JNIEnvironment.hpp"
+#include "../utils/JStringUtils.hpp"
 
 namespace jh
 {

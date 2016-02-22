@@ -11,10 +11,10 @@
 
 #include <jni.h>
 #include <string>
-#include "ToJavaType.hpp"
-#include "ErrorHandler.hpp"
-#include "JavaEnvironment.hpp"
-#include "JavaMethodSignature.hpp"
+#include "../core/ToJavaType.hpp"
+#include "../core/ErrorHandler.hpp"
+#include "../core/JNIEnvironment.hpp"
+#include "../core/JavaMethodSignature.hpp"
 
 namespace jh
 {
@@ -23,7 +23,13 @@ namespace jh
     * Each class represents different return type of Java method.
     */
     template<class ReturnType, class ... ArgumentTypes>
-    struct StaticCaller;
+    struct StaticCaller
+    {
+        static jobject call(JNIEnv* env, jclass javaClass, jmethodID javaMethod, ArgumentTypes ... arguments)
+        {
+            return env->CallStaticObjectMethod(javaClass, javaMethod, arguments...);
+        }
+    };
 
     template<class ... ArgumentTypes>
     struct StaticCaller<void, ArgumentTypes...>
@@ -79,24 +85,6 @@ namespace jh
         }
     };
 
-    template<class ... ArgumentTypes>
-    struct StaticCaller<jobject, ArgumentTypes...>
-    {
-        static jobject call(JNIEnv* env, jclass javaClass, jmethodID javaMethod, ArgumentTypes ... arguments)
-        {
-            return env->CallStaticObjectMethod(javaClass, javaMethod, arguments...);
-        }
-    };
-
-    template<class ... ArgumentTypes>
-    struct StaticCaller<jstring, ArgumentTypes...>
-    {
-        static jstring call(JNIEnv* env, jclass javaClass, jmethodID javaMethod, ArgumentTypes ... arguments)
-        {
-            return static_cast<jstring>(env->CallStaticObjectMethod(javaClass, javaMethod, arguments...));
-        }
-    };
-
     /**
     * Calls a static method of some Java class. Programmer should explicitly
     * specify the return type and argument types via template arguments.
@@ -123,34 +111,34 @@ namespace jh
     *
     * @endcode
     */
-    template<class RealReturnType, class ... ArgumentTypes>
-    typename ToJavaType<RealReturnType>::Type callStaticMethod(std::string className, std::string methodName, typename ToJavaType<ArgumentTypes>::Type ... arguments)
+    template<class ReturnType, class ... ArgumentTypes>
+    typename ToJavaType<ReturnType>::Type callStaticMethod(std::string className, std::string methodName, typename ToJavaType<ArgumentTypes>::Type ... arguments)
     {
-        using FakeReturnType = typename ToJavaType<RealReturnType>::Type;
+        using RealReturnType = typename ToJavaType<ReturnType>::Type;
 
         JNIEnv* env = getCurrentJNIEnvironment();
 
-        std::string methodSignature = getJavaMethodSignature<RealReturnType, ArgumentTypes...>();
+        std::string methodSignature = getJavaMethodSignature<ReturnType, ArgumentTypes...>();
 
         jclass javaClass = env->FindClass(className.c_str());
         if (javaClass == nullptr) {
             reportInternalError("class not found [" + className + "]");
-            return FakeReturnType();
+            return RealReturnType();
         }
 
         jmethodID javaMethod = env->GetStaticMethodID(javaClass, methodName.c_str(), methodSignature.c_str());
         if (javaMethod == nullptr) {
             reportInternalError("method [" + methodName + "] for class [" + className + "] not found, tried signature [" + methodSignature + "]");
-            return FakeReturnType();
+            return RealReturnType();
         }
 
-        return StaticCaller<FakeReturnType, typename ToJavaType<ArgumentTypes>::Type ...>::call(env, javaClass, javaMethod, arguments...);
+        return static_cast<RealReturnType>(StaticCaller<typename ToJavaType<ReturnType>::CallReturnType, typename ToJavaType<ArgumentTypes>::Type ...>::call(env, javaClass, javaMethod, arguments...));
     }
 
-    template<class JavaClassType, class RealReturnType, class ... ArgumentTypes>
-    typename ToJavaType<RealReturnType>::Type callStaticMethod(std::string methodName, typename ToJavaType<ArgumentTypes>::Type ... arguments)
+    template<class JavaClassType, class ReturnType, class ... ArgumentTypes>
+    typename ToJavaType<ReturnType>::Type callStaticMethod(std::string methodName, typename ToJavaType<ArgumentTypes>::Type ... arguments)
     {
-        return callStaticMethod<RealReturnType, ArgumentTypes ...>(JavaClassType::className(), methodName, arguments...);
+        return callStaticMethod<ReturnType, ArgumentTypes ...>(JavaClassType::className(), methodName, arguments...);
     }
 }
 
