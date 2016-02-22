@@ -40,13 +40,19 @@ namespace jh
             return false;
         }
 
-        bool pop(jobject* jobjectToKeep = nullptr)
+        bool pop()
+        {
+            return pop<jobject>(nullptr);
+        }
+
+        template <class JObjectCastable>
+        bool pop(JObjectCastable* jobjectToKeep)
         {
             if (m_framesCount) {
                 JNIEnv *env = getCurrentJNIEnvironment();
 
                 if (jobjectToKeep) {
-                    *jobjectToKeep = env->PopLocalFrame(*jobjectToKeep);
+                    *jobjectToKeep = static_cast<JObjectCastable>(env->PopLocalFrame(*jobjectToKeep));
                 } else {
                     env->PopLocalFrame(nullptr);
                 }

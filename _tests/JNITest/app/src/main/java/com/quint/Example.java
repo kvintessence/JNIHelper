@@ -81,4 +81,42 @@ public class Example
     {
         return new Example();
     }
+
+    // STATIC NATIVE METHODS
+
+    public static void callNativeStaticMethodLater()
+    {
+        Log.i(TAG, "Registered delayed callback.");
+
+        new java.util.Timer().schedule(
+                new java.util.TimerTask() {
+                    @Override
+                    public void run() {
+                        staticNativeMethod();
+                    }
+                },
+                2000
+        );
+    }
+
+    public native static void staticNativeMethod();
+
+    // INSTANCE NATIVE METHODS
+
+    public void testNativeMethod()
+    {
+        Log.i(TAG, "calling native method #1...");
+        native1();
+        Log.i(TAG, "calling native method #2 (3.1 + 0.0415): " + native2(3.1, 0.0415));
+        Log.i(TAG, "calling native method #3 (...X...): " + native3("kanojo"));
+        Log.i(TAG, "calling native method #4 (777): " + native4().instance3());
+        Log.i(TAG, "calling native method #5...");
+        native5(this);
+    }
+
+    public native void native1();
+    public native double native2(double d1, double d2);
+    public native String native3(String s);
+    public native Example native4();
+    public native void native5(Example e);
 }

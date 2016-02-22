@@ -95,7 +95,9 @@
 #include "_android/JavaCustomClass.hpp"
 
 #include "_android/JStringUtils.hpp"
+#include "_android/LocalReferenceFrame.hpp"
 
 #include "_android/JavaObjectWrapper.hpp"
+#include "_android/JavaNativeMethod.hpp"
 
 #endif

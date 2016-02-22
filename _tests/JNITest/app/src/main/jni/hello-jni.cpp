@@ -63,6 +63,159 @@ void testInstanceMethods()
     jh::reportInternalInfo("Test #3: End.");
 }
 
+static jh::JavaObjectPointer exampleObj;
+
+void testObjectWrapperStart()
+{
+    jh::reportInternalInfo("Test #4: Object pointer.");
+
+    jh::reportInternalInfo("Should be null: " + to_string(exampleObj == nullptr));
+    exampleObj = jh::createNewObject<JavaExample>();
+    jh::reportInternalInfo("Should not be null: " + to_string(exampleObj != nullptr));
+
+    jh::JavaObjectPointer other = exampleObj;
+    jh::reportInternalInfo("Copy should not be null either: " + to_string(other != nullptr));
+    int res = jh::callMethod<int>(other, "instance3");
+    jh::reportInternalInfo("calling method (should return 777): " + to_string(res));
+    jh::reportInternalInfo("Will be continued later...");
+}
+
+void testObjectWrapperAndStaticNativeMethodsEnd()
+{
+    jh::reportInternalInfo("Continuing test #4 & #7...");
+
+    jh::reportInternalInfo("Should not be null: " + to_string(exampleObj != nullptr));
+    int res = jh::callMethod<int>(exampleObj, "instance3");
+    jh::reportInternalInfo("calling method (should return 777): " + to_string(res));
+
+    jh::reportInternalInfo("Test #4 & #7: End.");
+}
+
+void testLocalFrame()
+{
+    jh::reportInternalInfo("Test #5: Local frame.");
+
+    jstring s1 = jh::createJString("s1");
+
+    jh::LocalReferenceFrame frame;
+
+    jstring s2 = jh::createJString("s2");
+    jh::reportInternalInfo("s1 is alive: " + to_string(!jh::areEqual(s1, nullptr)));
+    jh::reportInternalInfo("s2 is alive: " + to_string(!jh::areEqual(s2, nullptr)));
+
+    frame.pop();
+    jh::reportInternalInfo("Poped local references frame, s2 should be dead...");
+
+    // seams like uncommenting the second line will crash the app; this is correct behaviour
+    jh::reportInternalInfo("s1 is alive: " + to_string(!jh::areEqual(s1, nullptr)));
+//    jh::reportInternalInfo("s2 is alive: " + to_string(!jh::areEqual(s2, nullptr)));
+
+    jh::reportInternalInfo("New frame, new s2...");
+
+    frame.push();
+    s2 = jh::createJString("s2");
+
+    jh::reportInternalInfo("s1 is alive: " + to_string(!jh::areEqual(s1, nullptr)));
+    jh::reportInternalInfo("s2 is alive: " + to_string(!jh::areEqual(s2, nullptr)));
+
+    jh::reportInternalInfo("Popping frame, but leaving s2...");
+
+    frame.pop(&s2);
+    jh::reportInternalInfo("s1 is alive: " + to_string(!jh::areEqual(s1, nullptr)));
+    jh::reportInternalInfo("s2 is alive: " + to_string(!jh::areEqual(s2, nullptr)));
+
+    jh::reportInternalInfo("Test #5: End.");
+}
+
+void jstringTest()
+{
+    jh::reportInternalInfo("Test #6: JString utils.");
+
+    jh::LocalReferenceFrame frame;
+
+    jh::reportInternalInfo("Lets transform jstring to std::string and back...");
+    jh::reportInternalInfo("12345: [" + jh::jstringToStdString(jh::createJString("12345")) + "]");
+    jh::reportInternalInfo("Рашн лангвич: [" + jh::jstringToStdString(jh::createJString("Рашн лангвич")) + "]");
+    jh::reportInternalInfo("!@#$%^&*()[]{}|/.,: [" + jh::jstringToStdString(jh::createJString("!@#$%^&*()[]{}|/.,")) + "]");
+    jh::reportInternalInfo("empty: [" + jh::jstringToStdString(jh::createJString("")) + "]");
+
+    jh::reportInternalInfo("Test #6: End.");
+}
+
+void staticNativeMethodsTest()
+{
+    jh::reportInternalInfo("Test #7: Static native methods.");
+
+    jh::reportInternalInfo("Registering native method, which will be called later...");
+    jh::registerStaticNativeMethod<JavaExample, void>("staticNativeMethod", &testObjectWrapperAndStaticNativeMethodsEnd);
+    jh::callStaticMethod<JavaExample, void>("callNativeStaticMethodLater");
+
+    jh::reportInternalInfo("Will be continued later...");
+}
+
+class ExampleWrapper : public jh::JavaObjectWrapper<JavaExample, ExampleWrapper>
+{
+public:
+    void test()
+    {
+        jh::reportInternalInfo("object=" + to_string(object()));
+        jh::callMethod<void>(object(), "testNativeMethod");
+    }
+
+private:
+    void linkJavaNativeMethods() override
+    {
+        registerNativeMethod<1, void>("native1", &ExampleWrapper::native1);
+        registerNativeMethod<2, double, double, double>("native2", &ExampleWrapper::native2);
+        registerNativeMethod<3, jstring, jstring>("native3", &ExampleWrapper::native3);
+        registerNativeMethod<4, JavaExample>("native4", &ExampleWrapper::native4);
+        registerNativeMethod<5, void, JavaExample>("native5", &ExampleWrapper::native5);
+    }
+
+    jobject initializeJavaObject() override
+    {
+        return jh::createNewObject<JavaExample>();
+    }
+
+    void native1()
+    {
+        jh::reportInternalInfo("native1 method called");
+    }
+
+    double native2(double x, double y)
+    {
+        return x + y;
+    }
+
+    jstring native3(jstring s)
+    {
+        std::string ss = jh::jstringToStdString(s);
+        return jh::createJString(ss + "X" + ss);
+    }
+
+    jobject native4()
+    {
+        return jh::createNewObject<JavaExample>();
+    }
+
+    void native5(jobject example)
+    {
+        jh::callMethod<void>(example, "instance1");
+    }
+};
+
+void testNativeMethod()
+{
+    jh::reportInternalInfo("Test #8: Instance native methods.");
+
+    jh::reportInternalInfo("equal = " + to_string(jh::areEqual(nullptr, nullptr)));
+
+    ExampleWrapper wrapper;
+    wrapper.test();
+
+    jh::reportInternalInfo("Will be continued later...");
+}
+
 extern "C"
 {
     void Java_com_example_hellojni_HelloJni_performTest(JNIEnv*, jobject)
@@ -70,5 +223,10 @@ extern "C"
         testObjectCreation();
         testStaticMethods();
         testInstanceMethods();
+        testObjectWrapperStart();
+        testLocalFrame();
+        jstringTest();
+        staticNativeMethodsTest();
+        testNativeMethod();
     }
 }
