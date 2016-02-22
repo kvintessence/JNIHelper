@@ -1,9 +1,9 @@
-/*!
-   \file ToJavaType.hpp
-   \brief
-   \author Denis Sorokin
-   \date 21.02.2016
- */
+/**
+    \file ToJavaType.hpp
+    \brief Internal type deduction.
+    \author Denis Sorokin
+    \date 21.02.2016
+*/
 
 #ifndef JH_TO_JAVA_TYPE_HPP
 #define JH_TO_JAVA_TYPE_HPP
@@ -13,6 +13,14 @@
 
 namespace jh
 {
+    /**
+    * Structure that provides some information about internal types.
+    *
+    * @param Type The corresponding JNI type of the 'T' object.
+    * @param Type The corresponding JNI type of the 'T' object which is returned by JNI calls.
+    * @param signature The signature of 'T' type.
+    * @param className The class name (path?) of 'T' type, if it is some default/custom java type.
+    */
     template<class T>
     struct ToJavaType
     {
@@ -30,6 +38,9 @@ namespace jh
         }
     };
 
+    /**
+    * Structure that provides some information about void type.
+    */
     template<>
     struct ToJavaType<void>
     {
@@ -42,6 +53,9 @@ namespace jh
         }
     };
 
+    /**
+    * Structure that provides some information about bool type.
+    */
     template<>
     struct ToJavaType<bool>
     {
@@ -54,6 +68,9 @@ namespace jh
         }
     };
 
+    /**
+    * Structure that provides some information about int type.
+    */
     template<>
     struct ToJavaType<int>
     {
@@ -66,6 +83,9 @@ namespace jh
         }
     };
 
+    /**
+    * Structure that provides some information about long type.
+    */
     template<>
     struct ToJavaType<long>
     {
@@ -78,6 +98,9 @@ namespace jh
         }
     };
 
+    /**
+    * Structure that provides some information about float type.
+    */
     template<>
     struct ToJavaType<float>
     {
@@ -90,6 +113,9 @@ namespace jh
         }
     };
 
+    /**
+    * Structure that provides some information about double type.
+    */
     template<>
     struct ToJavaType<double>
     {
@@ -103,9 +129,8 @@ namespace jh
     };
 
     /**
-    * Different jobject-like pointers classes
+    * Structure that describes a type that can be casted to jobject.
     */
-
     template<class JavaType>
     struct JPointerLike
     {
@@ -113,6 +138,9 @@ namespace jh
         using CallReturnType = jobject;
     };
 
+    /**
+    * Structure that provides some information about jobject type.
+    */
     template<>
     struct ToJavaType<jobject> : public JPointerLike<jobject>
     {
@@ -127,6 +155,9 @@ namespace jh
         }
     };
 
+    /**
+    * Structure that provides some information about jstring type.
+    */
     template<>
     struct ToJavaType<jstring> : public JPointerLike<jstring>
     {
@@ -142,9 +173,10 @@ namespace jh
     };
 
     /**
-    * Arrays
+    * Structure that describes the types of java arrays.
+    *
+    * @param ElementType The corresponding JNI type of the elements inside this array.
     */
-
     template<class JavaElementType>
     struct JavaArray
     {
@@ -156,6 +188,9 @@ namespace jh
         }
     };
 
+    /**
+    * Structure that describes the types of custom java arrays.
+    */
     template<>
     template<class JavaType>
     struct ToJavaType<JavaArray<JavaType>> : public JavaArray<JavaType>
@@ -164,26 +199,44 @@ namespace jh
         using CallReturnType = jobjectArray;
     };
 
+    /**
+    * Structure that provides some information about jbooleanArray type.
+    */
     template<>
     struct ToJavaType<jbooleanArray> : public JavaArray<jboolean>, public JPointerLike<jbooleanArray>
     { };
 
+    /**
+    * Structure that provides some information about jintArray type.
+    */
     template<>
     struct ToJavaType<jintArray> : public JavaArray<jint>, public JPointerLike<jintArray>
     { };
 
+    /**
+    * Structure that provides some information about jlongArray type.
+    */
     template<>
     struct ToJavaType<jlongArray> : public JavaArray<jlong>, public JPointerLike<jlongArray>
     { };
 
+    /**
+    * Structure that provides some information about jfloatArray type.
+    */
     template<>
     struct ToJavaType<jfloatArray> : public JavaArray<jfloat>, public JPointerLike<jfloatArray>
     { };
 
+    /**
+    * Structure that provides some information about jdoubleArray type.
+    */
     template<>
     struct ToJavaType<jdoubleArray> : public JavaArray<jdouble>, public JPointerLike<jdoubleArray>
     { };
 
+    /**
+    * Structure that provides some information about jobjectArray type.
+    */
     template<>
     struct ToJavaType<jobjectArray> : public JavaArray<jobject>, public JPointerLike<jobjectArray>
     { };

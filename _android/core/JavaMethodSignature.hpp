@@ -1,10 +1,9 @@
-/*!
-   \file JavaMethodSignature.hpp
-   \brief A utility to deduce java method signatures.
-   \author Denis Sorokin
-   \date January 24 2016
-   \copyright Zeptolab, 2016
- */
+/**
+    \file JavaMethodSignature.hpp
+    \brief Java method signatures deduction.
+    \author Denis Sorokin
+    \date 24.01.2016
+*/
 
 #ifndef JH_JAVA_METHOD_SIGNATURE_HPP
 #define JH_JAVA_METHOD_SIGNATURE_HPP
@@ -15,8 +14,7 @@
 namespace jh
 {
     /**
-    * Internal Java method signature deduction. Each struct represents different
-    * argument type of Java method.
+    * Internal Java method signature deduction for two and more classes.
     */
     template<class FirstArgumentType, class ... OtherArgumentTypes>
     struct Signature
@@ -27,6 +25,9 @@ namespace jh
         }
     };
 
+    /**
+    * Internal Java method signature deduction for one class.
+    */
     template<class ArgumentType>
     struct Signature<ArgumentType>
     {

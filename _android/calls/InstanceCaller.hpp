@@ -1,13 +1,33 @@
-/*!
-   \file JavaInstanceCaller.hpp
-   \brief A utility to call java methods on a specific objects.
-   \author Denis Sorokin
-   \date January 24 2016
-   \copyright Zeptolab, 2016
- */
+/**
+    \file InstanceCaller.hpp
+    \brief A utility to call java methods of a specific objects.
+    \author Denis Sorokin
+    \date 24.01.2016
+*/
 
-#ifndef JH_JAVA_INSTANCE_CALLER_HPP
-#define JH_JAVA_INSTANCE_CALLER_HPP
+/**
+* Cheat sheet:
+*
+* @code{.cpp}
+*
+* // Lets assume that we already have some Java object
+* jobject someObject = ...;
+*
+* // Calling void method without arguments:
+* jh::callMethod<void>(someObject, "voidMethodName");
+*
+* // Calling int method with two arguments:
+* int sum = jh::callMethod<int, int, int>(someObject, "sumMethod", 4, 5);
+*
+* // Calling factory method that returns some custom Java object:
+* JH_JAVA_CUSTOM_CLASS(Example, "com/class/path/Example");
+* jobject newObject = jh::callMethod<Example, double>(someObject, "factoryMethodName", 3.1415);
+*
+* @endcode
+*/
+
+#ifndef JH_INSTANCE_CALLER_HPP
+#define JH_INSTANCE_CALLER_HPP
 
 #include <jni.h>
 #include <string>
@@ -18,8 +38,7 @@
 namespace jh
 {
     /**
-    * Classes that describe internal implementation for Java instance calls.
-    * Each class represents different return type of Java method.
+    * Class that can call methods which return java objects.
     */
     template<class ReturnType, class ... ArgumentTypes>
     struct InstanceCaller
@@ -30,6 +49,9 @@ namespace jh
         }
     };
 
+    /**
+    * Class that can call methods which doesn't return anything.
+    */
     template<class ... ArgumentTypes>
     struct InstanceCaller<void, ArgumentTypes...>
     {
@@ -39,6 +61,9 @@ namespace jh
         }
     };
 
+    /**
+    * Class that can call methods which return jboolean values.
+    */
     template<class ... ArgumentTypes>
     struct InstanceCaller<jboolean, ArgumentTypes...>
     {
@@ -48,6 +73,9 @@ namespace jh
         }
     };
 
+    /**
+    * Class that can call methods which return jint values.
+    */
     template<class ... ArgumentTypes>
     struct InstanceCaller<jint, ArgumentTypes...>
     {
@@ -57,6 +85,9 @@ namespace jh
         }
     };
 
+    /**
+    * Class that can call methods which return jlong values.
+    */
     template<class ... ArgumentTypes>
     struct InstanceCaller<jlong, ArgumentTypes...>
     {
@@ -66,6 +97,9 @@ namespace jh
         }
     };
 
+    /**
+    * Class that can call methods which return jfloat values.
+    */
     template<class ... ArgumentTypes>
     struct InstanceCaller<jfloat, ArgumentTypes...>
     {
@@ -75,6 +109,9 @@ namespace jh
         }
     };
 
+    /**
+    * Class that can call methods which return jdouble values.
+    */
     template<class ... ArgumentTypes>
     struct InstanceCaller<jdouble, ArgumentTypes...>
     {
@@ -85,31 +122,13 @@ namespace jh
     };
 
     /**
-    * Calls a method on some Java object instance. Programmer should explicitly
+    * Calls a method of some Java object instance. Programmer should explicitly
     * specify the return type and argument types via template arguments.
     *
     * @param instance Java object (jobject)
     * @param methodName Method name as string.
     * @param arguments List of arguments to the java method call.
-    *
-    * Possible usage example:
-    *
-    * @code{.cpp}
-    *
-    * // Lets assume that we already have some Java object
-    * jobject someObject = ...;
-    *
-    * // Calling void method without arguments:
-    * jh::callMethod<void>(someObject, "voidMethodName");
-    *
-    * // Calling int method with two arguments:
-    * int sum = jh::callMethod<int, int, int>(someObject, "sumMethod", 4, 5);
-    *
-    * // Calling factory method that returns some custom Java object:
-    * JH_JAVA_CUSTOM_CLASS(Example, "com/class/path/Example");
-    * jobject newObject = jh::callMethod<Example, double>(someObject, "factoryMethodName", 3.1415);
-    *
-    * @endcode
+    * @return Some value of ReturnType type returned by the specified method.
     */
     template<class ReturnType, class ... ArgumentTypes>
     typename ToJavaType<ReturnType>::Type callMethod(jobject instance, std::string methodName, typename ToJavaType<ArgumentTypes>::Type ... arguments)

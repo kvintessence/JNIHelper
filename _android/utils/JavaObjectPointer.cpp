@@ -1,10 +1,9 @@
-/*!
-   \file JavaObjectPointer.cpp
-   \brief RAII class to store jobject reference as a global reference.
-   \author Denis Sorokin
-   \date January 28 2016
-   \copyright Zeptolab, 2016
- */
+/**
+    \file JavaObjectPointer.cpp
+    \brief RAII class to store jobject reference as a global reference.
+    \author Denis Sorokin
+    \date 28.01.2016
+*/
 
 #include "../core/JNIEnvironment.hpp"
 #include "../utils/JavaObjectPointer.hpp"

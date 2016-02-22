@@ -1,25 +1,27 @@
-/*!
-   \file JavaArraySetter.hpp
-   \brief
-   \author Denis Sorokin
-   \date 22.02.2016
- */
+/**
+    \file ArrayGetter.hpp
+    \brief Internal implementation of getting elements from java arrays.
+    \author Denis Sorokin
+    \date 22.02.2016
+*/
 
-#ifndef JH_JAVA_ARRAY_GETTER_HPP
-#define JH_JAVA_ARRAY_GETTER_HPP
+#ifndef JH_ARRAY_GETTER_HPP
+#define JH_ARRAY_GETTER_HPP
 
 #include <vector>
 #include <jni.h>
-#include "../core/JNIEnvironment.hpp"
 
 namespace jh
 {
     /**
-    * Implementations for setting values into java arrays.
+    * Stub implementations for getting elements from java arrays.
     */
     template<class JavaArrayType>
     struct JavaArrayGetter;
 
+    /**
+    * Implementations for getting elements from java boolean arrays.
+    */
     template<>
     struct JavaArrayGetter<jbooleanArray>
     {
@@ -39,6 +41,9 @@ namespace jh
         }
     };
 
+    /**
+    * Implementations for getting elements from java int arrays.
+    */
     template<>
     struct JavaArrayGetter<jintArray>
     {
@@ -58,6 +63,9 @@ namespace jh
         }
     };
 
+    /**
+    * Implementations for getting elements from java long arrays.
+    */
     template<>
     struct JavaArrayGetter<jlongArray>
     {
@@ -77,6 +85,9 @@ namespace jh
         }
     };
 
+    /**
+    * Implementations for getting elements from java float arrays.
+    */
     template<>
     struct JavaArrayGetter<jfloatArray>
     {
@@ -96,6 +107,9 @@ namespace jh
         }
     };
 
+    /**
+    * Implementations for getting elements from java double arrays.
+    */
     template<>
     struct JavaArrayGetter<jdoubleArray>
     {
@@ -115,6 +129,9 @@ namespace jh
         }
     };
 
+    /**
+    * Implementations for getting elements from java object arrays.
+    */
     template<>
     struct JavaArrayGetter<jobjectArray>
     {

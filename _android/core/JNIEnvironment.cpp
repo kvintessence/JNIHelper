@@ -1,10 +1,9 @@
-/*!
-   \file JNIEnvironment.cpp
-   \brief Utilities to get and use JNIEnv* pointer.
-   \author Denis Sorokin
-   \date January 24 2016
-   \copyright Zeptolab, 2016
- */
+/**
+    \file JNIEnvironment.cpp
+    \brief Utilities to get and use JNIEnv* pointer.
+    \author Denis Sorokin
+    \date 24.01.2016
+*/
 
 #include <jni.h>
 #include "../../zframework/core/_android/jnienv.h"

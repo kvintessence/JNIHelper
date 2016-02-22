@@ -1,10 +1,9 @@
-/*!
-   \file JStringUtils.cpp
-   \brief Utility functions to use jstring objects.
-   \author Denis Sorokin
-   \date January 24 2016
-   \copyright Zeptolab, 2016
- */
+/**
+    \file JStringUtils.cpp
+    \brief Utility functions to use jstring objects.
+    \author Denis Sorokin
+    \date 24.01.2016
+*/
 
 #include "../core/JNIEnvironment.hpp"
 #include "../utils/JStringUtils.hpp"

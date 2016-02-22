@@ -1,10 +1,9 @@
-/*!
-   \file JavaNativeMethod.cpp
-   \brief Allocation and registration of java native methods in c++
-   \author Denis Sorokin
-   \date February 15 2016
-   \copyright Zeptolab, 2016
- */
+/**
+    \file JavaNativeMethod.cpp
+    \brief Allocation and registration of java native methods in C++.
+    \author Denis Sorokin
+    \date 15.02.2016
+*/
 
 #include <string>
 #include "../core/ErrorHandler.hpp"
