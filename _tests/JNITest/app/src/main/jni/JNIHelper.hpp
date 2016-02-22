@@ -2,8 +2,7 @@
     \file JavaHelper.hpp
     \brief A small utility library to hide all the horrors of JNI API.
     \author Denis Sorokin
-    \date January 24 2016
-    \copyright Zeptolab, 2016
+    \date 24.01.2016
 
     Changelog:
 
@@ -84,20 +83,21 @@
 #ifndef JH_JAVA_HELPER_HPP
 #define JH_JAVA_HELPER_HPP
 
-#include "_android/JavaEnvironment.hpp"
+#include "_android/arrays/ArrayBuilder.hpp"
 
-#include "_android/JavaStaticCaller.hpp"
-#include "_android/JavaInstanceCaller.hpp"
-#include "_android/JavaMethodSignature.hpp"
+#include "_android/calls/StaticCaller.hpp"
+#include "_android/calls/InstanceCaller.hpp"
+#include "_android/calls/ObjectCreation.hpp"
 
-#include "_android/JavaObjectPointer.hpp"
-#include "_android/JavaObjectCreation.hpp"
-#include "_android/JavaCustomClass.hpp"
+#include "_android/core/JavaCustomClass.hpp"
+#include "_android/core/JavaMethodSignature.hpp"
+#include "_android/core/JNIEnvironment.hpp"
 
-#include "_android/JStringUtils.hpp"
-#include "_android/LocalReferenceFrame.hpp"
+#include "_android/native/JavaObjectWrapper.hpp"
+#include "_android/native/JavaNativeMethod.hpp"
 
-#include "_android/JavaObjectWrapper.hpp"
-#include "_android/JavaNativeMethod.hpp"
+#include "_android/utils/LocalReferenceFrame.hpp"
+#include "_android/utils/JavaObjectPointer.hpp"
+#include "_android/utils/JStringUtils.hpp"
 
 #endif

@@ -1,5 +1,5 @@
 /*!
-   \file JavaEnvironment.hpp
+   \file JNIEnvironment.hpp
    \brief Utilities to get and use JNIEnv* pointer.
    \author Denis Sorokin
    \date January 24 2016
@@ -55,11 +55,11 @@ namespace jh
     *
     * @endcode
     */
-    class JavaEnvironmentGuarantee
+    class JNIEnvironmentGuarantee
     {
     public:
-        JavaEnvironmentGuarantee();
-        ~JavaEnvironmentGuarantee();
+        JNIEnvironmentGuarantee();
+        ~JNIEnvironmentGuarantee();
 
     private:
         bool m_threadShouldBeDetached;

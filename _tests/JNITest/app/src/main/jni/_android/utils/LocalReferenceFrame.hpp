@@ -9,7 +9,7 @@
 #define JH_LOCAL_REFERENCE_FRAME_HPP
 
 #include <jni.h>
-#include "JavaEnvironment.hpp"
+#include "../core/JNIEnvironment.hpp"
 
 namespace jh
 {

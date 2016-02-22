@@ -13,9 +13,10 @@
 #include <vector>
 #include <functional>
 #include <jni.h>
-#include "ToJavaType.hpp"
-#include "ErrorHandler.hpp"
-#include "JavaNativeMethod.hpp"
+#include "../core/ToJavaType.hpp"
+#include "../core/ErrorHandler.hpp"
+#include "../native/JavaNativeMethod.hpp"
+#include "../utils/JavaObjectPointer.hpp"
 
 namespace jh
 {
@@ -156,7 +157,6 @@ namespace jh
         JavaObjectWrapper()
         : m_javaObject(nullptr)
         {
-            jh::reportInternalInfo("constructor");
             // nothing to do here
         }
 
@@ -172,8 +172,6 @@ namespace jh
         {
             if (!s_nativeMethodsWereRegistered) {
                 linkJavaNativeMethods();
-
-                jh::reportInternalInfo("registering methods...");
 
                 std::vector<JNINativeMethod> descriptions;
                 for (auto& description : s_nativeMethodsDescriptions) {
@@ -196,7 +194,6 @@ namespace jh
             }
 
             if (!m_javaObject) {
-                jh::reportInternalInfo("init object...");
                 m_javaObject = initializeJavaObject();
 
                 if (m_javaObject) {

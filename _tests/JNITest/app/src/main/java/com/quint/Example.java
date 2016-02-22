@@ -2,6 +2,9 @@ package com.quint;
 
 import android.util.Log;
 
+import java.util.Arrays;
+import java.util.Map;
+
 public class Example
 {
     static final String TAG = "Example";
@@ -35,9 +38,9 @@ public class Example
         Log.i(TAG, "Static method without arguments.");
     }
 
-    static void static2(int x, boolean y)
+    static String static2(int x, boolean y)
     {
-        Log.i(TAG, "Static method with two arguments: int=" + x + ", boolean=" + y + ".");
+        return "" + x + " = " + y;
     }
 
     static void static3(Example other)
@@ -119,4 +122,60 @@ public class Example
     public native String native3(String s);
     public native Example native4();
     public native void native5(Example e);
+
+    // ARRAY METHODS
+    public void array1(int[] i)
+    {
+        Log.i(TAG, "array1: " + Arrays.toString(i));
+    }
+
+    public float[] array2()
+    {
+        return new float[] {1.1f, 2.2f, 3.3f, 4.4f, 5.5f};
+    }
+
+    public String array3(String[] ss)
+    {
+        String s = "";
+
+        for (String ts : ss)
+            s += ts + " > ";
+
+        return s;
+    }
+
+    public String[] array4()
+    {
+        return new String[] {"s1", "s2"};
+    }
+
+    private int m_x;
+    public Example(int x)
+    {
+        m_x = x;
+    }
+
+    public int get()
+    {
+        return m_x;
+    }
+
+    public void array5(Example[] el)
+    {
+        Log.i(TAG, "array5:");
+        for (Example e : el) {
+            Log.i(TAG, "" + e.m_x);
+        }
+    }
+
+    public Example[] array6()
+    {
+        return new Example[] { new Example(7), new Example(77), new Example(777) };
+    }
+
+    // MAP METHODS
+    public void map1(Map<String, String> intToInt)
+    {
+        Log.i(TAG, "" + intToInt);
+    }
 }

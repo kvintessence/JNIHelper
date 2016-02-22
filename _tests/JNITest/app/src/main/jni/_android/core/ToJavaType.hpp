@@ -17,6 +17,7 @@ namespace jh
     struct ToJavaType
     {
         using Type = jobject;
+        using CallReturnType = jobject;
 
         static std::string signature()
         {
@@ -33,6 +34,7 @@ namespace jh
     struct ToJavaType<void>
     {
         using Type = void;
+        using CallReturnType = void;
 
         static std::string signature()
         {
@@ -44,6 +46,7 @@ namespace jh
     struct ToJavaType<bool>
     {
         using Type = jboolean;
+        using CallReturnType = jboolean;
 
         static std::string signature()
         {
@@ -55,6 +58,7 @@ namespace jh
     struct ToJavaType<int>
     {
         using Type = jint;
+        using CallReturnType = jint;
 
         static std::string signature()
         {
@@ -66,6 +70,7 @@ namespace jh
     struct ToJavaType<long>
     {
         using Type = jlong;
+        using CallReturnType = jlong;
 
         static std::string signature()
         {
@@ -77,6 +82,7 @@ namespace jh
     struct ToJavaType<float>
     {
         using Type = jfloat;
+        using CallReturnType = jfloat;
 
         static std::string signature()
         {
@@ -88,6 +94,7 @@ namespace jh
     struct ToJavaType<double>
     {
         using Type = jdouble;
+        using CallReturnType = jdouble;
 
         static std::string signature()
         {
@@ -95,11 +102,20 @@ namespace jh
         }
     };
 
-    template<>
-    struct ToJavaType<jobject>
-    {
-        using Type = jobject;
+    /**
+    * Different jobject-like pointers classes
+    */
 
+    template<class JavaType>
+    struct JPointerLike
+    {
+        using Type = JavaType;
+        using CallReturnType = jobject;
+    };
+
+    template<>
+    struct ToJavaType<jobject> : public JPointerLike<jobject>
+    {
         static std::string className()
         {
             return "java/lang/Object";
@@ -111,12 +127,9 @@ namespace jh
         }
     };
 
-
     template<>
-    struct ToJavaType<jstring>
+    struct ToJavaType<jstring> : public JPointerLike<jstring>
     {
-        using Type = jstring;
-
         static std::string className()
         {
             return "java/lang/String";
@@ -127,6 +140,53 @@ namespace jh
             return "L" + className() + ";";
         }
     };
+
+    /**
+    * Arrays
+    */
+
+    template<class JavaElementType>
+    struct JavaArray
+    {
+        using ElementType = JavaElementType;
+
+        static std::string signature()
+        {
+            return "[" + ToJavaType<JavaElementType>::signature();
+        }
+    };
+
+    template<>
+    template<class JavaType>
+    struct ToJavaType<JavaArray<JavaType>> : public JavaArray<JavaType>
+    {
+        using Type = jobjectArray;
+        using CallReturnType = jobjectArray;
+    };
+
+    template<>
+    struct ToJavaType<jbooleanArray> : public JavaArray<jboolean>, public JPointerLike<jbooleanArray>
+    { };
+
+    template<>
+    struct ToJavaType<jintArray> : public JavaArray<jint>, public JPointerLike<jintArray>
+    { };
+
+    template<>
+    struct ToJavaType<jlongArray> : public JavaArray<jlong>, public JPointerLike<jlongArray>
+    { };
+
+    template<>
+    struct ToJavaType<jfloatArray> : public JavaArray<jfloat>, public JPointerLike<jfloatArray>
+    { };
+
+    template<>
+    struct ToJavaType<jdoubleArray> : public JavaArray<jdouble>, public JPointerLike<jdoubleArray>
+    { };
+
+    template<>
+    struct ToJavaType<jobjectArray> : public JavaArray<jobject>, public JPointerLike<jobjectArray>
+    { };
 }
 
 #endif

@@ -11,9 +11,9 @@
 
 #include <jni.h>
 #include <string>
-#include "ErrorHandler.hpp"
-#include "JavaEnvironment.hpp"
-#include "JavaMethodSignature.hpp"
+#include "../core/ErrorHandler.hpp"
+#include "../core/JNIEnvironment.hpp"
+#include "../core/JavaMethodSignature.hpp"
 
 namespace jh
 {
@@ -22,7 +22,13 @@ namespace jh
     * Each class represents different return type of Java method.
     */
     template<class ReturnType, class ... ArgumentTypes>
-    struct InstanceCaller;
+    struct InstanceCaller
+    {
+        static jobject call(JNIEnv* env, jobject instance, jmethodID javaMethod, ArgumentTypes ... arguments)
+        {
+            return env->CallObjectMethod(instance, javaMethod, arguments...);
+        }
+    };
 
     template<class ... ArgumentTypes>
     struct InstanceCaller<void, ArgumentTypes...>
@@ -78,24 +84,6 @@ namespace jh
         }
     };
 
-    template<class ... ArgumentTypes>
-    struct InstanceCaller<jobject, ArgumentTypes...>
-    {
-        static jobject call(JNIEnv* env, jobject instance, jmethodID javaMethod, ArgumentTypes ... arguments)
-        {
-            return env->CallObjectMethod(instance, javaMethod, arguments...);
-        }
-    };
-
-    template<class ... ArgumentTypes>
-    struct InstanceCaller<jstring, ArgumentTypes...>
-    {
-        static jstring call(JNIEnv* env, jobject instance, jmethodID javaMethod, ArgumentTypes ... arguments)
-        {
-            return static_cast<jstring>(env->CallObjectMethod(instance, javaMethod, arguments...));
-        }
-    };
-
     /**
     * Calls a method on some Java object instance. Programmer should explicitly
     * specify the return type and argument types via template arguments.
@@ -123,28 +111,28 @@ namespace jh
     *
     * @endcode
     */
-    template<class RealReturnType, class ... ArgumentTypes>
-    typename ToJavaType<RealReturnType>::Type callMethod(jobject instance, std::string methodName, typename ToJavaType<ArgumentTypes>::Type ... arguments)
+    template<class ReturnType, class ... ArgumentTypes>
+    typename ToJavaType<ReturnType>::Type callMethod(jobject instance, std::string methodName, typename ToJavaType<ArgumentTypes>::Type ... arguments)
     {
-        using FakeReturnType = typename ToJavaType<RealReturnType>::Type;
+        using RealReturnType = typename ToJavaType<ReturnType>::Type;
 
         JNIEnv* env = getCurrentJNIEnvironment();
 
-        std::string methodSignature = getJavaMethodSignature<RealReturnType, ArgumentTypes...>();
+        std::string methodSignature = getJavaMethodSignature<ReturnType, ArgumentTypes...>();
 
         jclass javaClass = env->GetObjectClass(instance);
         if (javaClass == nullptr) {
             reportInternalError("class for java object instance not found");
-            return FakeReturnType();
+            return RealReturnType();
         }
 
         jmethodID javaMethod = env->GetMethodID(javaClass, methodName.c_str(), methodSignature.c_str());
         if (javaMethod == nullptr) {
             reportInternalError("method [" + methodName + "] for java object instance not found, tried signature [" + methodSignature + "]");
-            return FakeReturnType();
+            return RealReturnType();
         }
 
-        return InstanceCaller<FakeReturnType, typename ToJavaType<ArgumentTypes>::Type ...>::call(env, instance, javaMethod, arguments...);
+        return static_cast<RealReturnType>(InstanceCaller<typename ToJavaType<ReturnType>::CallReturnType, typename ToJavaType<ArgumentTypes>::Type ...>::call(env, instance, javaMethod, arguments...));
     }
 }
 

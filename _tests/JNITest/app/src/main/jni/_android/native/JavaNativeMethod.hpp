@@ -1,17 +1,16 @@
 /*!
    \file JavaNativeMethod.hpp
-   \brief Allocation and registration of java native methods in c++
+   \brief Allocation and registration of java native methods in C++
    \author Denis Sorokin
-   \date February 15 2016
-   \copyright Zeptolab, 2016
+   \date 15.02.2016
  */
 
 #ifndef JH_JAVA_NATIVE_METHOD_HPP
 #define JH_JAVA_NATIVE_METHOD_HPP
 
 #include <jni.h>
-#include "ErrorHandler.hpp"
-#include "JavaMethodSignature.hpp"
+#include "../core/ErrorHandler.hpp"
+#include "../core/JavaMethodSignature.hpp"
 
 namespace jh
 {

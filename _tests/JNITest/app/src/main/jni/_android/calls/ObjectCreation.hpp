@@ -11,10 +11,10 @@
 
 #include <jni.h>
 #include <string>
-#include "ToJavaType.hpp"
-#include "ErrorHandler.hpp"
-#include "JavaEnvironment.hpp"
-#include "JavaMethodSignature.hpp"
+#include "../core/ToJavaType.hpp"
+#include "../core/ErrorHandler.hpp"
+#include "../core/JNIEnvironment.hpp"
+#include "../core/JavaMethodSignature.hpp"
 
 namespace jh
 {

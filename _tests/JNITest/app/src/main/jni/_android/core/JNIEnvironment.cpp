@@ -1,5 +1,5 @@
 /*!
-   \file JavaEnvironment.cpp
+   \file JNIEnvironment.cpp
    \brief Utilities to get and use JNIEnv* pointer.
    \author Denis Sorokin
    \date January 24 2016
@@ -7,9 +7,9 @@
  */
 
 #include <jni.h>
-#include "../zframework/core/_android/jnienv.h"
-#include "JavaEnvironment.hpp"
-#include "ErrorHandler.hpp"
+#include "../../zframework/core/_android/jnienv.h"
+#include "../core/JNIEnvironment.hpp"
+#include "../core/ErrorHandler.hpp"
 
 namespace jh
 {
@@ -32,7 +32,7 @@ namespace jh
         return env;
     }
 
-    JavaEnvironmentGuarantee::JavaEnvironmentGuarantee()
+    JNIEnvironmentGuarantee::JNIEnvironmentGuarantee()
     : m_threadShouldBeDetached(false)
     {
         JNIEnv* env = nullptr;
@@ -55,7 +55,7 @@ namespace jh
         }
     }
 
-    JavaEnvironmentGuarantee::~JavaEnvironmentGuarantee()
+    JNIEnvironmentGuarantee::~JNIEnvironmentGuarantee()
     {
         if (m_threadShouldBeDetached) {
             getJavaVM()->DetachCurrentThread();

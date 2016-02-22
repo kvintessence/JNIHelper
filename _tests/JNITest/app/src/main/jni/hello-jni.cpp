@@ -1,6 +1,6 @@
 #include <sstream>
 #include <jni.h>
-#include "JavaHelper.hpp"
+#include "JNIHelper.hpp"
 
 template <class T>
 inline std::string to_string(const T& t)
@@ -33,7 +33,8 @@ void testStaticMethods()
 
     // old-style static calls
     jh::callStaticMethod<void>(JavaExample::className(), "static1");
-    jh::callStaticMethod<void, int, bool>(JavaExample::className(), "static2", 7, true);
+    jstring s = jh::callStaticMethod<jstring, int, bool>(JavaExample::className(), "static2", 7, true);
+    jh::reportInternalInfo("static2: " + jh::jstringToStdString(s));
 
     jlong x = jh::callStaticMethod<long, long, long>(JavaExample::className(), "static4", 7L, 8L);
     jh::reportInternalInfo("Static4: sum=" + to_string(x) + ".");
@@ -216,6 +217,57 @@ void testNativeMethod()
     jh::reportInternalInfo("Will be continued later...");
 }
 
+void testArrayMethods()
+{
+    jh::reportInternalInfo("Test #9: Array arguments.");
+
+    std::vector<int> v({10, 15, 20});
+    jobject o = jh::createNewObject<JavaExample>();
+    jh::callMethod<void, jintArray>(o, "array1", jh::JavaArrayBuilder<int>().add(5).add(v.begin(), v.end()).add({25, 30}).build());
+
+    jfloatArray fa = jh::callMethod<jfloatArray>(o, "array2");
+    auto std_fa = jh::jarrayToVector<jfloatArray>(fa);
+    jh::reportInternalInfo("Got float array from 'array2' method:");
+    for (auto f : std_fa) { jh::reportInternalInfo(to_string(f)); }
+
+    // passing multiple jstrings to java
+    jobjectArray jsa = jh::JavaArrayBuilder<jstring>()
+            .add(jh::createJString("1"))
+            .add(jh::createJString("2"))
+            .add(jh::createJString("3"))
+            .build();
+
+    jstring res3 = jh::callMethod<jstring, jh::JavaArray<jstring>>(o, "array3", jsa);
+    jh::reportInternalInfo("array3: " + jh::jstringToStdString(res3));
+
+    // getting multiple jstrings from java
+    jobjectArray res4 = jh::callMethod<jh::JavaArray<jstring>>(o, "array4");
+    auto jstrings = jh::jarrayToVector<jobjectArray>(res4);
+    jh::reportInternalInfo("array4:");
+    for (auto js : jstrings) {
+        jh::reportInternalInfo(to_string(jh::jstringToStdString(static_cast<jstring>(js))));
+    }
+
+    // passing multiple custom objects to java
+    jobjectArray examples5 = jh::JavaArrayBuilder<JavaExample>()
+            .add(jh::createNewObject<JavaExample, int>(1))
+            .add(jh::createNewObject<JavaExample, int>(3))
+            .add(jh::createNewObject<JavaExample, int>(7))
+            .build();
+
+    jh::callMethod<void, jh::JavaArray<JavaExample>>(o, "array5", examples5);
+
+    // getting multiple custom objects from java
+    jobjectArray res6 = jh::callMethod<jh::JavaArray<JavaExample>>(o, "array6");
+    auto examples6 = jh::jarrayToVector<jobjectArray>(res6);
+    jh::reportInternalInfo("array6:");
+    for (auto e : examples6) {
+        jh::reportInternalInfo("Example: x = " + to_string(jh::callMethod<int>(e, "get")));
+    }
+
+    jh::reportInternalInfo("Test #9: End.");
+}
+
 extern "C"
 {
     void Java_com_example_hellojni_HelloJni_performTest(JNIEnv*, jobject)
@@ -228,5 +280,6 @@ extern "C"
         jstringTest();
         staticNativeMethodsTest();
         testNativeMethod();
+        testArrayMethods();
     }
 }

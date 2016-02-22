@@ -6,7 +6,8 @@
    \copyright Zeptolab, 2016
  */
 
-#include "JavaObjectPointer.hpp"
+#include "../core/JNIEnvironment.hpp"
+#include "../utils/JavaObjectPointer.hpp"
 
 namespace jh
 {
