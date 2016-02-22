@@ -11,6 +11,7 @@
 
 #include <jni.h>
 #include "ErrorHandler.hpp"
+#include "JavaMethodSignature.hpp"
 
 namespace jh
 {
@@ -27,6 +28,26 @@ namespace jh
     */
     bool registerJavaNativeMethods(std::string javaClassName, int methodCount, JNINativeMethod* methodDescriptions);
 
+    template<class ReturnType, class ... ArgumentTypes>
+    bool registerStaticNativeMethod(std::string javaClassName, std::string methodName, ReturnType (*methodPointer)(ArgumentTypes...))
+    {
+        std::string signature = getJavaMethodSignature<ReturnType, ArgumentTypes...>();
+
+        JNINativeMethod method[1] = {
+            methodName.c_str(),
+            signature.c_str(),
+            (void*)methodPointer
+        };
+
+        return registerJavaNativeMethods(javaClassName, 1, method);
+    }
+
+    template<class JavaClassType, class ReturnType, class ... ArgumentTypes>
+    bool registerStaticNativeMethod(std::string methodName, ReturnType (*methodPointer)(ArgumentTypes...))
+    {
+        return registerStaticNativeMethod<ReturnType, ArgumentTypes ...>(JavaClassType::className(), methodName, methodPointer);
+    }
+
     /**
     * This class provides an static method that should be registered as java native method.
     * It should not be used by the programmer itself, but by the JavaObjectWrapper class.
@@ -40,10 +61,10 @@ namespace jh
     * @warning Each combination of template parameters should correspond to ONLY ONE native method.
     * @warning Native methods that were implemented by this class should NOT be called inside the java object constructor.
     */
-    template<int id, class WrapperBase, class ReturnType, class ... Arguments>
+    template<int id, class CppClass, class ReturnType, class ... Arguments>
     class JavaNativeMethod
     {
-        using MethodImplementationPointer = ReturnType(WrapperBase::WrapperDerived::*)(Arguments...);
+        using MethodImplementationPointer = ReturnType(CppClass::*)(Arguments...);
 
         template <class, class>
         friend class JavaObjectWrapper;
@@ -54,7 +75,7 @@ namespace jh
         static void setCallback(MethodImplementationPointer callback)
         {
             if (s_callback) {
-                reportInternalError("redefining callback for java class [" + WrapperBase::JavaClass::name() + "]");
+                reportInternalError("redefining callback for java class [" + CppClass::JavaClass::className() + "]");
             }
 
             s_callback = callback;
@@ -62,15 +83,14 @@ namespace jh
 
         static ReturnType rawNativeMethod(JNIEnv*, jobject javaObject, Arguments ... args)
         {
-            return WrapperBase::WrapperDerived::template callCppObjectMethod<ReturnType>(javaObject, [=] (WrapperBase* wrapperInstance) -> ReturnType {
-                typename WrapperBase::WrapperDerived* ptr = static_cast<typename WrapperBase::WrapperDerived*>(wrapperInstance);
-                return (ptr->*s_callback)(args...);
+            return CppClass::template callCppObjectMethod<ReturnType>(javaObject, [=] (CppClass* wrapperInstance) -> ReturnType {
+                return (wrapperInstance->*s_callback)(args...);
             });
         }
     };
 
-    template<int id, class WrapperClass, class ReturnType, class ... Arguments>
-    typename JavaNativeMethod<id, WrapperClass, ReturnType, Arguments...>::MethodImplementationPointer JavaNativeMethod<id, WrapperClass, ReturnType, Arguments...>::s_callback(nullptr);
+    template<int id, class CppClass, class ReturnType, class ... Arguments>
+    typename JavaNativeMethod<id, CppClass, ReturnType, Arguments...>::MethodImplementationPointer JavaNativeMethod<id, CppClass, ReturnType, Arguments...>::s_callback(nullptr);
 }
 
 #endif
