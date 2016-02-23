@@ -163,6 +163,11 @@ public:
         jh::callMethod<void>(object(), "testNativeMethod");
     }
 
+    void testNativeArrays()
+    {
+        jh::callMethod<void>(object(), "testNativeMethodArray");
+    }
+
 private:
     void linkJavaNativeMethods() override
     {
@@ -171,6 +176,9 @@ private:
         registerNativeMethod<3, jstring, jstring>("native3", &ExampleWrapper::native3);
         registerNativeMethod<4, JavaExample>("native4", &ExampleWrapper::native4);
         registerNativeMethod<5, void, JavaExample>("native5", &ExampleWrapper::native5);
+
+        registerNativeMethod<6, jintArray>("array7", &ExampleWrapper::array7);
+        registerNativeMethod<7, jstring, jh::JavaArray<jstring>>("array8", &ExampleWrapper::array8);
     }
 
     jobject initializeJavaObject() override
@@ -202,6 +210,24 @@ private:
     void native5(jobject example)
     {
         jh::callMethod<void>(example, "instance1");
+    }
+
+    jintArray array7()
+    {
+        return jh::JavaArrayBuilder<int>().add({6, 66, 666}).build();
+    }
+
+    jstring array8(jobjectArray strings)
+    {
+        auto allStrings = jh::jarrayToVector<jobjectArray>(strings);
+
+        std::string result = jh::jstringToStdString(static_cast<jstring>(allStrings[0]));
+
+        for (auto i = 1; i < allStrings.size(); ++i) {
+            result += "-" + jh::jstringToStdString(static_cast<jstring>(allStrings[i]));
+        }
+
+        return jh::createJString(result);
     }
 };
 
@@ -264,6 +290,9 @@ void testArrayMethods()
     for (auto e : examples6) {
         jh::reportInternalInfo("Example: x = " + to_string(jh::callMethod<int>(e, "get")));
     }
+
+    ExampleWrapper wrapper;
+    wrapper.testNativeArrays();
 
     jh::reportInternalInfo("Test #9: End.");
 }

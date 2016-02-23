@@ -173,6 +173,22 @@ public class Example
         return new Example[] { new Example(7), new Example(77), new Example(777) };
     }
 
+    public void testNativeMethodArray()
+    {
+        Log.i(TAG, "Native method arrays:");
+
+        Log.i(TAG, "array7:");
+        for (int i : array7()) {
+            Log.i(TAG, "" + i);
+        }
+
+        Log.i(TAG, "array8: " + array8(new String[] {"8", "800", "555", "3535"}));
+    }
+
+    public native int[] array7();
+
+    public native String array8(String[] sss);
+
     // MAP METHODS
     public void map1(Map<String, String> intToInt)
     {
