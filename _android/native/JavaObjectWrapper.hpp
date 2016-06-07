@@ -164,7 +164,7 @@ namespace jh
             if (entry != s_objectsCollection.end()) {
                 s_objectsCollection.erase(entry);
             } else {
-                reportInternalError("unable to unregister cpp interstitial - not found");
+                reportInternalError("unable to unregister cpp object - not found");
             }
         }
 
