@@ -48,7 +48,15 @@ namespace jh
     {
         static jobject call(JNIEnv* env, jclass javaClass, jmethodID javaMethod, ArgumentTypes ... arguments)
         {
-            return env->CallStaticObjectMethod(javaClass, javaMethod, arguments...);
+            jobject r = env->CallStaticObjectMethod(javaClass, javaMethod, arguments...);
+            jthrowable exception = env->ExceptionOccurred();
+            if (exception != nullptr) {
+                env->ExceptionDescribe();
+                env->ExceptionClear();
+                env->DeleteLocalRef(r);
+                return nullptr;
+            }
+            return r;
         }
     };
 
@@ -61,6 +69,12 @@ namespace jh
         static void call(JNIEnv* env, jclass javaClass, jmethodID javaMethod, ArgumentTypes ... arguments)
         {
             env->CallStaticVoidMethod(javaClass, javaMethod, arguments...);
+            jthrowable exception = env->ExceptionOccurred();
+            if (exception != nullptr) {
+                env->ExceptionDescribe();
+                env->ExceptionClear();
+                return;
+            }
         }
     };
 
@@ -72,7 +86,14 @@ namespace jh
     {
         static jboolean call(JNIEnv* env, jclass javaClass, jmethodID javaMethod, ArgumentTypes ... arguments)
         {
-            return env->CallStaticBooleanMethod(javaClass, javaMethod, arguments...);
+            jboolean r = env->CallStaticBooleanMethod(javaClass, javaMethod, arguments...);
+            jthrowable exception = env->ExceptionOccurred();
+            if (exception != nullptr) {
+                env->ExceptionDescribe();
+                env->ExceptionClear();
+                return false;
+            }
+            return r;
         }
     };
 
@@ -84,7 +105,14 @@ namespace jh
     {
         static jint call(JNIEnv* env, jclass javaClass, jmethodID javaMethod, ArgumentTypes ... arguments)
         {
-            return env->CallStaticIntMethod(javaClass, javaMethod, arguments...);
+            jint r =  env->CallStaticIntMethod(javaClass, javaMethod, arguments...);
+            jthrowable exception = env->ExceptionOccurred();
+            if (exception != nullptr) {
+                env->ExceptionDescribe();
+                env->ExceptionClear();
+                return 0;
+            }
+            return r;
         }
     };
 
@@ -96,7 +124,14 @@ namespace jh
     {
         static jlong call(JNIEnv* env, jclass javaClass, jmethodID javaMethod, ArgumentTypes ... arguments)
         {
-            return env->CallStaticLongMethod(javaClass, javaMethod, arguments...);
+            jlong r = env->CallStaticLongMethod(javaClass, javaMethod, arguments...);
+            jthrowable exception = env->ExceptionOccurred();
+            if (exception != nullptr) {
+                env->ExceptionDescribe();
+                env->ExceptionClear();
+                return 0;
+            }
+            return r;
         }
     };
 
@@ -108,7 +143,14 @@ namespace jh
     {
         static jfloat call(JNIEnv* env, jclass javaClass, jmethodID javaMethod, ArgumentTypes ... arguments)
         {
-            return env->CallStaticFloatMethod(javaClass, javaMethod, arguments...);
+            jfloat r = env->CallStaticFloatMethod(javaClass, javaMethod, arguments...);
+            jthrowable exception = env->ExceptionOccurred();
+            if (exception != nullptr) {
+                env->ExceptionDescribe();
+                env->ExceptionClear();
+                return 0.0;
+            }
+            return r;
         }
     };
 
@@ -120,7 +162,14 @@ namespace jh
     {
         static jdouble call(JNIEnv* env, jclass javaClass, jmethodID javaMethod, ArgumentTypes ... arguments)
         {
-            return env->CallStaticDoubleMethod(javaClass, javaMethod, arguments...);
+            jdouble r = env->CallStaticDoubleMethod(javaClass, javaMethod, arguments...);
+            jthrowable exception = env->ExceptionOccurred();
+            if (exception != nullptr) {
+                env->ExceptionDescribe();
+                env->ExceptionClear();
+                return 0.0;
+            }
+            return r;
         }
     };
 
