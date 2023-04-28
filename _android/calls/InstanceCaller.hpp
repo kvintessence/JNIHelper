@@ -45,7 +45,15 @@ namespace jh
     {
         static jobject call(JNIEnv* env, jobject instance, jmethodID javaMethod, ArgumentTypes ... arguments)
         {
-            return env->CallObjectMethod(instance, javaMethod, arguments...);
+            jobject r = env->CallObjectMethod(instance, javaMethod, arguments...);
+            jthrowable exception = env->ExceptionOccurred();
+            if (exception != nullptr) {
+                env->ExceptionDescribe();
+                env->ExceptionClear();
+                env->DeleteLocalRef(r);
+                return nullptr;
+            }
+            return r;
         }
     };
 
@@ -58,6 +66,12 @@ namespace jh
         static void call(JNIEnv* env, jobject instance, jmethodID javaMethod, ArgumentTypes ... arguments)
         {
             env->CallVoidMethod(instance, javaMethod, arguments...);
+            jthrowable exception = env->ExceptionOccurred();
+            if (exception != nullptr) {
+                env->ExceptionDescribe();
+                env->ExceptionClear();
+                return;
+            }
         }
     };
 
@@ -69,7 +83,14 @@ namespace jh
     {
         static jboolean call(JNIEnv* env, jobject instance, jmethodID javaMethod, ArgumentTypes ... arguments)
         {
-            return env->CallBooleanMethod(instance, javaMethod, arguments...);
+            jboolean r = env->CallBooleanMethod(instance, javaMethod, arguments...);
+            jthrowable exception = env->ExceptionOccurred();
+            if (exception != nullptr) {
+                env->ExceptionDescribe();
+                env->ExceptionClear();
+                return false;
+            }
+            return r;
         }
     };
 
@@ -81,7 +102,14 @@ namespace jh
     {
         static jint call(JNIEnv* env, jobject instance, jmethodID javaMethod, ArgumentTypes ... arguments)
         {
-            return env->CallIntMethod(instance, javaMethod, arguments...);
+            jint r = env->CallIntMethod(instance, javaMethod, arguments...);
+            jthrowable exception = env->ExceptionOccurred();
+            if (exception != nullptr) {
+                env->ExceptionDescribe();
+                env->ExceptionClear();
+                return 0;
+            }
+            return r;
         }
     };
 
@@ -93,7 +121,14 @@ namespace jh
     {
         static jlong call(JNIEnv* env, jobject instance, jmethodID javaMethod, ArgumentTypes ... arguments)
         {
-            return env->CallLongMethod(instance, javaMethod, arguments...);
+            jlong r = env->CallLongMethod(instance, javaMethod, arguments...);
+            jthrowable exception = env->ExceptionOccurred();
+            if (exception != nullptr) {
+                env->ExceptionDescribe();
+                env->ExceptionClear();
+                return 0;
+            }
+            return r;
         }
     };
 
@@ -105,7 +140,14 @@ namespace jh
     {
         static jfloat call(JNIEnv* env, jobject instance, jmethodID javaMethod, ArgumentTypes ... arguments)
         {
-            return env->CallFloatMethod(instance, javaMethod, arguments...);
+            jfloat f = env->CallFloatMethod(instance, javaMethod, arguments...);
+            jthrowable exception = env->ExceptionOccurred();
+            if (exception != nullptr) {
+                env->ExceptionDescribe();
+                env->ExceptionClear();
+                return 0.0;
+            }
+            return f;
         }
     };
 
@@ -117,7 +159,14 @@ namespace jh
     {
         static jdouble call(JNIEnv* env, jobject instance, jmethodID javaMethod, ArgumentTypes ... arguments)
         {
-            return env->CallDoubleMethod(instance, javaMethod, arguments...);
+            jdouble d = env->CallDoubleMethod(instance, javaMethod, arguments...);
+            jthrowable exception = env->ExceptionOccurred();
+            if (exception != nullptr) {
+                env->ExceptionDescribe();
+                env->ExceptionClear();
+                return 0.0;
+            }
+            return d;
         }
     };
 
